@@ -8,7 +8,9 @@ webContent = response.read().decode("latin-1")
 soup = BeautifulSoup(webContent, 'html.parser')
 lista = soup.find(id="threads")
 lista2 = lista.find_all("li")
-"""
+titulos = []
+enlaces = []
+autores = []
 
 for item in lista2:
     h3 = item.find_all("h3")
@@ -16,15 +18,11 @@ for item in lista2:
         if len(item2)>0:
             a = item2.find("a")
             titulo = a.string
+            titulos.append(titulo)
             enlace_tema = "https://foros.derecho.com/" + a.get('href')
-"""
-for item in lista2:
-    h3 = item.find(class_="threadtitle")
-    h3.find("a")
-    print(h3)
-    """"
-    a = h3.find("a")
-    titulo = a.string
-    enlace_tema = "https://foros.derecho.com/" + a.get('href')
-    print(enlace_tema)
-    """
+            enlaces.append(enlace_tema)
+    autores2 = item.find_all(class_="author")
+    for i in autores2:
+        autor = i.find("a").string
+        
+    
