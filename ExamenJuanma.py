@@ -36,7 +36,7 @@ def buscar_nombre_bd(nombre):
 def ordenar_puntuacion_bd():
     conn = sqlite3.connect('examen.db')
     conn.text_factory = str  
-    cursor = conn.execute("SELECT NOMBRE, MARCA, PUNTUACION FROM ZAPATILLAS WHERE PUNTUACION != NONE ORDER BY PUNTUACION DESC")
+    cursor = conn.execute("SELECT NOMBRE, MARCA, PUNTUACION FROM ZAPATILLAS WHERE PUNTUACION != NONE AND NUMERO_PUNTUACION > 5 ORDER BY PUNTUACION DESC")
     print(cursor)
     conn.close()
 
