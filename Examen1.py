@@ -51,7 +51,6 @@ def buscar():
                 text = result_list_1[i][0] + ", " + result_list_1[i][1] + ", " + result_list_1[i][2]
                 list_1.insert(i, text)
 
-
             list_1.pack()
         
         n_entry = tkinter.Entry(n_1)
@@ -64,10 +63,19 @@ def buscar():
 
 
     def ordenarPorPuntuacion():
+        conn = sqlite3.connect('examen.db')
+        conn.text_factory = str  
+        cursor = conn.execute("SELECT NOMBRE, MARCA, PUNTUACION FROM ZAPATILLAS WHERE PUNTUACION != NONE AND NUMERO_PUNTUACION > 5 ORDER BY PUNTUACION DESC")
+        result_list_2 = list(dict.fromkeys(cursor))
+
         l_2 = tkinter.Tk()
         l_2.geometry("400x400")
 
         list_2 = tkinter.Listbox(l_2, width=300, height=300)
+
+        for i in range(len(result_list_2)):
+                text = result_list_2[i][0] + ", " + result_list_2[i][1] + ", " + result_list_2[i][2]
+                list_2.insert(i, text)
 
         list_2.pack()
 
@@ -80,12 +88,21 @@ def buscar():
         elements = ['a', 'b', 'c']
 
         def buscarMarca():
-            #result = m_spin.get()
+            marca = m_spin.get()
+
+            conn = sqlite3.connect('examen.db')
+            conn.text_factory = str  
+            cursor = conn.execute("""SELECT NOMBRE, MARCA, PRECIO, PUNTUACION FROM ZAPATILLAS WHERE MARCA = ?""", (marca,))
+            result_list_3 = list(dict.fromkeys(cursor))
 
             l_3 = tkinter.Tk()
             l_3.geometry("400x400")
 
             list_3 = tkinter.Listbox(l_3, width=300, height=300)
+
+            for i in range(len(result_list_3)):
+                text = result_list_3[i][0] + ", " + result_list_3[i][1] + ", " + result_list_3[i][2] + ", " + result_list_3[i][3]
+                list_3.insert(i, text)
 
             list_3.pack()
         
