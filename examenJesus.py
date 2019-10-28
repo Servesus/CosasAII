@@ -12,7 +12,7 @@ def extraer():
     puntuaciones = []
     numero_puntuaciones = []
     for i in range(1,4):
-        f = urllib.request.urlopen("https://www.sprinter.es/zapatillas-de-hombre?page="+str(i))
+        f = urllib.request.urlopen("https://www.sprinter.es/zapatillas-de-hombre?page="+str(i)+"&per_page=20")
         s = BeautifulSoup(f,"lxml")
         productos = s.find_all("div",class_="product__data")
         for producto in productos:
@@ -40,11 +40,12 @@ def extraer():
             puntuaciones_total = total['content']
             puntuaciones.append(rating)
             numero_puntuaciones.append(puntuaciones_total)
+            print(rating)
 
-            return nombres,marcas,precios,precios_oferta,puntuaciones,numero_puntuaciones
+    return nombres,marcas,precios,precios_oferta,puntuaciones,numero_puntuaciones
             
         
 
-
+extraer()
 
 
