@@ -39,3 +39,10 @@ def ordenar_puntuacion_bd():
     cursor = conn.execute("SELECT NOMBRE, MARCA, PUNTUACION FROM ZAPATILLAS WHERE PUNTUACION != NONE ORDER BY PUNTUACION DESC")
     print(cursor)
     conn.close()
+
+def buscar_marca_bd(marca):
+    conn = sqlite3.connect('examen.db')
+    conn.text_factory = str  
+    cursor = conn.execute("""SELECT NOMBRE, MARCA, PRECIO, PUNTUACION FROM ZAPATILLAS WHERE MARCA = ?""", (marca,))
+    print(cursor)
+    conn.close()
