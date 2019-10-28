@@ -35,12 +35,22 @@ def buscar():
         n_1.geometry("200x200")
 
         def buscarNombre():
-            #result = n_entry.get()
+            nombre = n_entry.get()
+
+            conn = sqlite3.connect('examen.db')
+            conn.text_factory = str  
+            cursor = conn.execute("""SELECT NOMBRE, MARCA, PRECIO FROM ZAPATILLAS WHERE NOMBRE = ?""",(nombre,))
+            result_list_1 = list(dict.fromkeys(cursor))
 
             l_1 = tkinter.Tk()
             l_1.geometry("400x400")
 
             list_1 = tkinter.Listbox(l_1, width=300, height=300)
+
+            for i in range(len(result_list_1)):
+                text = result_list_1[i][0] + ", " + result_list_1[i][1] + ", " + result_list_1[i][2]
+                list_1.insert(i, text)
+
 
             list_1.pack()
         
