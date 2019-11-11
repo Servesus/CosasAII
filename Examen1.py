@@ -10,7 +10,64 @@ def datos():
     a_part.geometry("200x200")
 
     def cargar():
-        messagebox.showinfo("Info","Base de Datos Poblada con exito")
+
+        nombres = []
+        marcas = []
+        precios = []
+        precios_oferta = []
+        puntuaciones = []
+        numero_puntuaciones = []
+
+        for i in range(1,4):
+            f = urlopen("https://www.sprinter.es/zapatillas-de-hombre?page="+str(i)+"&per_page=20")
+            s = BeautifulSoup(f,"lxml")
+            productos = s.find_all("div",class_="product__data")
+
+            for producto in productos:
+                nombre = producto.a.string
+                nombres.append(nombre)
+                marcas.append(producto.a.string.split(" ")[0])
+                try:
+                    precio_old = producto.find("span",class_="product__price--old").contents[0]
+                except:
+                    precio_old = None
+                precio_actual = producto.find("span",class_="product__price--actual").string
+                if precio_old == None:
+                    precios.append(precio_actual)
+                    precios_oferta.append(None)    
+                else:
+                    precios.append(precio_old)
+                    precios_oferta.append(precio_actual)            
+                
+                url_nueva = "https://www.sprinter.es" + producto.a.get("href")
+                f2 = urlopen(url_nueva)
+                s2 = BeautifulSoup(f2,"lxml")
+                div_dots = div_dots = s2.find("div",class_="average")
+                rating = div_dots.span.string
+                total = s2.find("div",class_="stats").find("meta",attrs = {'itemprop':'reviewCount'})
+                puntuaciones_total = total['content']
+                puntuaciones.append(rating)
+                numero_puntuaciones.append(puntuaciones_total)
+
+        conn = sqlite3.connect('examen.db')
+        conn.text_factory = str
+        conn.execute("DROP TABLE IF EXISTS ZAPATILLAS") 
+        conn.execute('''CREATE TABLE ZAPATILLAS
+        (NOMBRE              TEXT    NOT NULL,
+            MARCA               TEXT    NOT NULL,
+            PRECIO              TEXT    NOT NULL,
+            PRECIO_OFERTA       TEXT            ,
+            PUNTUACION          INTEGER         ,
+            NUMERO_PUNTUACION   INTEGER);''')
+
+        for i, values in enumerate(marcas):
+            conn.execute("""INSERT INTO ZAPATILLAS VALUES (?,?,?,?,?,?)""",(nombres[i], marcas[i], precios[i],
+            precios_oferta[i], int(puntuaciones[i]), int(numero_puntuaciones[i])))
+        
+        conn.commit()
+        cursor = conn.execute("SELECT COUNT(*) FROM ZAPATILLAS")
+        messagebox.showinfo( "Base Datos", "Base de datos creada correctamente \nHay " + str(cursor.fetchone()[0]) + " zapatillas")
+        conn.close()
 
         tkinter.mainloop()
 
@@ -35,12 +92,22 @@ def buscar():
         n_1.geometry("200x200")
 
         def buscarNombre():
-            #result = n_entry.get()
+            nombre = n_entry.get()
+
+            conn = sqlite3.connect('examen.db')
+            conn.text_factory = str  
+            #cursor = conn.execute("""SELECT NOMBRE, MARCA, PRECIO FROM ZAPATILLAS WHERE NOMBRE LIKE ?""",(nombre,))
+            cursor = conn.execute("SELECT NOMBRE, MARCA, PRECIO FROM ZAPATILLAS WHERE NOMBRE LIKE '%" + nombre + "%'")
+            result_list_1 = list(dict.fromkeys(cursor))
 
             l_1 = tkinter.Tk()
             l_1.geometry("400x400")
 
             list_1 = tkinter.Listbox(l_1, width=300, height=300)
+
+            for i in range(len(result_list_1)):
+                text = result_list_1[i][0] + ", " + result_list_1[i][1] + ", " + result_list_1[i][2]
+                list_1.insert(i, text)
 
             list_1.pack()
         
@@ -54,10 +121,19 @@ def buscar():
 
 
     def ordenarPorPuntuacion():
+        conn = sqlite3.connect('examen.db')
+        conn.text_factory = str  
+        cursor = conn.execute("SELECT NOMBRE, MARCA, PUNTUACION FROM ZAPATILLAS WHERE NUMERO_PUNTUACION > 5 ORDER BY PUNTUACION DESC")
+        result_list_2 = list(dict.fromkeys(cursor))
+
         l_2 = tkinter.Tk()
         l_2.geometry("400x400")
 
         list_2 = tkinter.Listbox(l_2, width=300, height=300)
+
+        for i in range(len(result_list_2)):
+                text = result_list_2[i][0] + ", " + result_list_2[i][1] + ", " + str(result_list_2[i][2])
+                list_2.insert(i, text)
 
         list_2.pack()
 
@@ -67,15 +143,34 @@ def buscar():
         m_1 = tkinter.Tk()
         m_1.geometry("200x200")
 
-        elements = ['a', 'b', 'c']
+        conn = sqlite3.connect('examen.db')
+
+        brands_list = conn.execute("""SELECT MARCA FROM ZAPATILLAS""")
+        brands_list = brands_list.fetchall()
+        brands_list = list(dict.fromkeys(brands_list))
+
+        j = []
+
+        for i in brands_list:
+            j.append(i[0])
+
+        elements = j
 
         def buscarMarca():
-            #result = m_spin.get()
+            marca = m_spin.get()
+
+            conn.text_factory = str  
+            cursor = conn.execute("""SELECT NOMBRE, MARCA, PRECIO, PUNTUACION FROM ZAPATILLAS WHERE MARCA = ?""", (marca,))
+            result_list_3 = list(dict.fromkeys(cursor))
 
             l_3 = tkinter.Tk()
             l_3.geometry("400x400")
 
             list_3 = tkinter.Listbox(l_3, width=300, height=300)
+
+            for i in range(len(result_list_3)):
+                text = result_list_3[i][0] + ", " + result_list_3[i][1] + ", " + result_list_3[i][2] + ", " + str(result_list_3[i][3])
+                list_3.insert(i, text)
 
             list_3.pack()
         
