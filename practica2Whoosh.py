@@ -1,9 +1,14 @@
-encoding = "utf-8"
 from bs4 import BeautifulSoup
-import urllib.request as urllib2
+import urllib.request
 import datetime
 from tkinter import *
 from tkinter import messagebox
+from whoosh.fields import Schema, TEXT, KEYWORD, ID, STORED
+from whoosh.analysis import StemmingAnalyzer
+import os, os.path
+from whoosh import index,fields
+
+
 
 
 def llamadaObtencionDatos():
@@ -28,9 +33,9 @@ def llamadaObtencionDatos():
 def obtenerDatos(url):
     
     urlBasica="http://www.sensacine.com/"
-    response = urllib2.urlopen(url)
-    webContent = response.read()
-    soup = BeautifulSoup(webContent, 'html.parser')
+    response = urllib.request.urlopen(url)
+    
+    soup = BeautifulSoup(response.read().decode("latin-1"), 'lxml')
     
     listaCategoria=[]
     listaTitulos=[]
@@ -41,15 +46,51 @@ def obtenerDatos(url):
     
     for categorias in soup.findAll("div",attrs={"class":"meta-category"}):
         listaCategoria.append(categorias.string.split("-")[1].strip(" "))
-    for titulos in soup.findAll("a",attrs={"class":"meta-title-link"}):
-        listaTitulos.append(titulos.string.strip())
-        listaEnlaces.append(urlBasica+titulos.get("href"))
-    for fechas in soup.findAll("div",attrs={"class":"meta-date"}):
-        fechaSinCasting=fechas.string.split(" ")[1]+ "/" + meses[fechas.string.split(" ")[3]] + "/" + fechas.string.split(" ")[5]
-        fechasCasting= datetime.datetime.strptime(fechaSinCasting, '%d/%m/%Y')
-        listaFechas.append(fechasCasting)
-    for descripciones in soup.findAll("div",attrs={"class":"meta-body"}):
-        listaDescripciones.append(descripciones.string)
+        for titulos in soup.findAll("a",attrs={"class":"meta-title-link"}):
+            listaTitulos.append(titulos.string.strip())
+            listaEnlaces.append(urlBasica+titulos.get("href"))
+        for fechas in soup.findAll("div",attrs={"class":"meta-date"}):
+            fechaSinCasting=fechas.string.split(" ")[1]+ "/" + meses[fechas.string.split(" ")[3]] + "/" + fechas.string.split(" ")[5]
+            fechasCasting= datetime.datetime.strptime(fechaSinCasting, '%d/%m/%Y')
+            listaFechas.append(fechasCasting)
+        for descripciones in soup.findAll("div",attrs={"class":"meta-body"}):
+            listaDescripciones.append(descripciones.string)
         
     return listaCategoria, listaTitulos, listaEnlaces, listaFechas ,listaDescripciones
-        
+
+def crearTxt():
+    lista = llamadaObtencionDatos()
+    for i in range(0,len(lista[0])):
+
+        file_object = open("Archivo"+str(i)+".txt","w")
+        file_object.write(str(lista[0][i]))
+        file_object.write("\n")
+        file_object.write(str(lista[1][i]))
+        file_object.write("\n")
+        file_object.write(str(lista[2][i]))
+        file_object.write("\n")
+        file_object.write(str(lista[3][i]))
+        file_object.write("\n")
+        a = lista[4][i]
+        b = str(a)
+        file_object.write(b)
+
+def whooshFunction():
+    lista = llamadaObtencionDatos()
+    schema = Schema(categoria=TEXT(stored=True),
+                titulo=TEXT(stored=True),
+                enlace=TEXT(stored=True),
+                descripcion=TEXT(analyzer=StemmingAnalyzer()),
+                fecha=fields.DATETIME(stored=True))
+
+    if not os.path.exists("indexdir"):
+        os.mkdir("indexdir")
+
+    ix = index.create_in("indexdir", schema)
+    writer = ix.writer()
+    
+    for i in range(len(lista[0])):
+        writer.add_document(categoria=lista[0][i], titulo=lista[1][i], enlace=lista[2][i], descripcion=lista[3][i]
+        ,fecha=str(lista[4][i]))
+
+crearTxt()
