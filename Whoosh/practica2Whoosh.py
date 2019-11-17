@@ -53,7 +53,7 @@ def obtenerDatos(url):
             listaEnlaces.append(urlBasica+titulos.get("href"))
         for fechas in soup.findAll("div",attrs={"class":"meta-date"}):
             fechaSinCasting=fechas.string.split(" ")[1]+ "/" + meses[fechas.string.split(" ")[3]] + "/" + fechas.string.split(" ")[5]
-            fechasCasting= datetime.datetime.strptime(fechaSinCasting, '%d/%m/%Y')
+            fechasCasting= datetime.strptime(fechaSinCasting, '%d/%m/%Y')
             listaFechas.append(fechasCasting)
         for descripciones in soup.findAll("div",attrs={"class":"meta-body"}):
             listaDescripciones.append(descripciones.string)
@@ -62,8 +62,9 @@ def obtenerDatos(url):
 
 def crearTxt(dirdocs):
     lista = llamadaObtencionDatos()
+    if not os.path.isdir(dirdocs):
+        os.mkdir(dirdocs)
     for i in range(0,len(lista[0])):
-
         file_object = open(dirdocs + "/Archivo"+str(i)+".txt","w")
         file_object.write(str(lista[0][i]))
         file_object.write("\n")
@@ -106,11 +107,13 @@ def whooshFunction(dirdocs):
 
 def buscador(texto):
     ix = index.open_dir("indexdir")
+    myquery = '{'+ texto + 'TO 20200101 000000]' 
     with ix.searcher() as searcher:
-        query = QueryParser("categoria", ix.schema).parse(texto)
+        query = QueryParser("fecha", ix.schema).parse(myquery)
         results = searcher.search(query)
         for r in results:
             print(r['titulo'])
 
-#dirdocs = "D:/Documentos/Universidad/4º/CosasAII/Archivitos"
-buscador("Entrevistas")
+dirdocs = "D:/Documentos/Universidad/4º/CosasAII/Archivitos"
+#whooshFunction(dirdocs)
+buscador("20180101 000000")
