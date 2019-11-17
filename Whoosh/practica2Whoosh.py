@@ -7,6 +7,8 @@ from whoosh.fields import Schema, TEXT, KEYWORD, ID, STORED
 from whoosh.analysis import StemmingAnalyzer
 import os, os.path
 from whoosh import index,fields
+from datetime import datetime
+from whoosh.qparser import QueryParser
 
 
 
@@ -35,7 +37,7 @@ def obtenerDatos(url):
     urlBasica="http://www.sensacine.com/"
     response = urllib.request.urlopen(url)
     
-    soup = BeautifulSoup(response.read().decode("latin-1"), 'lxml')
+    soup = BeautifulSoup(response.read().decode("utf-8"), 'lxml')
     
     listaCategoria=[]
     listaTitulos=[]
@@ -58,11 +60,11 @@ def obtenerDatos(url):
         
     return listaCategoria, listaTitulos, listaEnlaces, listaFechas ,listaDescripciones
 
-def crearTxt():
+def crearTxt(dirdocs):
     lista = llamadaObtencionDatos()
     for i in range(0,len(lista[0])):
 
-        file_object = open("Archivo"+str(i)+".txt","w")
+        file_object = open(dirdocs + "/Archivo"+str(i)+".txt","w")
         file_object.write(str(lista[0][i]))
         file_object.write("\n")
         file_object.write(str(lista[1][i]))
@@ -75,11 +77,11 @@ def crearTxt():
         b = str(a)
         file_object.write(b)
 
-def whooshFunction():
-    lista = llamadaObtencionDatos()
+def whooshFunction(dirdocs):
+    crearTxt(dirdocs)
     schema = Schema(categoria=TEXT(stored=True),
                 titulo=TEXT(stored=True),
-                enlace=TEXT(stored=True),
+                enlace=ID(stored=True),
                 descripcion=TEXT(analyzer=StemmingAnalyzer()),
                 fecha=fields.DATETIME(stored=True))
 
@@ -88,9 +90,27 @@ def whooshFunction():
 
     ix = index.create_in("indexdir", schema)
     writer = ix.writer()
-    
-    for i in range(len(lista[0])):
-        writer.add_document(categoria=lista[0][i], titulo=lista[1][i], enlace=lista[2][i], descripcion=lista[3][i]
-        ,fecha=str(lista[4][i]))
+    for docname in os.listdir(dirdocs):
+        if not os.path.isdir(dirdocs+docname):
+            fileobj=open(dirdocs+'\\'+docname, "r")
+            cat=fileobj.readline().strip()
+            tit=fileobj.readline().strip()
+            enlc=fileobj.readline().strip()
+            f=fileobj.readline().strip()
+            fech=datetime.strptime(f,'%Y-%m-%d %H:%M:%S')
+            descrp=fileobj.readline().strip()
+            fileobj.close()           
+            
+            writer.add_document(categoria = cat, titulo = tit, enlace = enlc, descripcion = descrp, fecha = fech)
+    writer.commit()
 
-crearTxt()
+def buscador(texto):
+    ix = index.open_dir("indexdir")
+    with ix.searcher() as searcher:
+        query = QueryParser("categoria", ix.schema).parse(texto)
+        results = searcher.search(query)
+        for r in results:
+            print(r['titulo'])
+
+#dirdocs = "D:/Documentos/Universidad/4º/CosasAII/Archivitos"
+buscador("Entrevistas")
