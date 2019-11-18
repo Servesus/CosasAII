@@ -8,7 +8,7 @@ from whoosh.analysis import StemmingAnalyzer
 import os, os.path
 from whoosh import index,fields
 from datetime import datetime
-from whoosh.qparser import QueryParser
+from whoosh.qparser import QueryParser, MultifieldParser
 
 def extraer():
     titulos = []
@@ -90,11 +90,28 @@ def whooshFunction(dirdocs):
     writer.commit()
 
 def buscador_a(texto):
+    palabras = texto.split(" ")
+    nuevas = []
+    for palabra in palabras:
+        if palabra == "y" or palabra == "Y":
+            nuevas.append("AND")
+        elif palabra == "o" or palabra == "O":
+            nuevas.append("OR")
+        elif palabra == "no" or palabra == "NO":
+            nuevas.append("NOT")
+        else:
+            nuevas.append(palabra)
+    string = ""
+    for nueva in nuevas:
+        string = string + str(nueva) + " "
+
     ix = index.open_dir("indexdir")
-    myquery = '{'+ texto + 'TO 20200101 000000]' 
     with ix.searcher() as searcher:
-        query = QueryParser("fecha", ix.schema).parse(myquery)
+        query =  MultifieldParser(["resumen","titulo"], ix.schema).parse(string)
         results = searcher.search(query)
         for r in results:
-            print(r['titulo'])
+            print(r['titulo'],r['fecha'])
+
+dirdocs = "D:/Documentos/Universidad/4º/CosasAII/Archivitos"
+#whooshFunction(dirdocs)
 
