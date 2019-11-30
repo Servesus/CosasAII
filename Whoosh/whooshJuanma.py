@@ -112,6 +112,7 @@ def buscador_a(texto):
         for r in results:
             print(r['titulo'],r['fecha'])
 
-dirdocs = "D:/Documentos/Universidad/4º/CosasAII/Archivitos"
-#whooshFunction(dirdocs)
+dirdocs = r"C:\Users\ercax\Desktop\Cosas python\CosasAII\Whoosh\txts"
+
+buscador_a("Policía y Sevilla")
 

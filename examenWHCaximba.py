@@ -12,7 +12,7 @@ from whoosh.analysis import StemmingAnalyzer
 import os, os.path
 from whoosh import index,fields
 from datetime import datetime
-from whoosh.qparser import QueryParser
+from whoosh.qparser import QueryParser, MultifieldParser
 
 def datos():
     a_part = tkinter.Tk()
@@ -20,7 +20,7 @@ def datos():
 
     def cargar():
 
-        dirdocs = r"C:\Users\ercax\Desktop\Cosas python\CosasAII\Whoosh\txts"
+        dirdocs = r"C:\Users\ercax\Desktop\Cosas python\CosasAII\Archivitos"
 
         def extraer():
             titulos = []
@@ -126,26 +126,43 @@ def buscar():
         n_1.geometry("200x200")
 
         def buscarContenidoTitulo():
-            #contenido = n_entry.get()
 
-            contenido = "algo Y poco NO esto"
+            contenido = n_entry.get()
 
-            palabras = contenido.split()
+            def buscador_a(texto):
+                palabras = texto.split(" ")
+                nuevas = []
+                for palabra in palabras:
+                    if palabra == "y" or palabra == "Y":
+                        nuevas.append("AND")
+                    elif palabra == "o" or palabra == "O":
+                        nuevas.append("OR")
+                    elif palabra == "no" or palabra == "NO":
+                        nuevas.append("NOT")
+                    else:
+                        nuevas.append(palabra)
+                string = ""
+                for nueva in nuevas:
+                    string = string + str(nueva) + " "
 
-            for i in range(len(palabras)):
-                if palabras[i] == 'Y':
-                    palabras[i] = palabras[i].replace('Y', 'and')
-                elif palabras[i] == 'O':
-                    palabras[i] = palabras[i].replace('O', 'or')
-                elif palabras[i] == 'NO':
-                    palabras[i] = palabras[i].replace('NO', 'not')
+                ix = index.open_dir("indexdir")
+                with ix.searcher() as searcher:
+                    query =  MultifieldParser(["resumen","titulo"], ix.schema).parse(string)
+                    results = searcher.search(query)
 
-            #result_list_1 = list(dict.fromkeys(cursor))
+                return results
+
+            results = buscador_a(contenido)
 
             l_1 = tkinter.Tk()
             l_1.geometry("400x400")
 
             list_1 = tkinter.Listbox(l_1, width=300, height=300)
+
+            i = 0
+            for r in results:
+                list_1.insert(i, r['titulo'])
+                i = i + 1
 
             list_1.pack()
         
