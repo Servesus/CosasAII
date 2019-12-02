@@ -1,5 +1,5 @@
 #encoding:utf-8
-from main.models import Evento
+from main.models import Evento,TipoEvento
 from main.forms import EventosFechaForm, EventosIdiomaForm
 from django.shortcuts import render
 from django.db.models import Avg
