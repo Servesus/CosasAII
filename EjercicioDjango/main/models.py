@@ -24,24 +24,8 @@ class Municipio(models.Model):
         ordering = ('municipio', )     
 
 class TipoEvento(models.Model):
-    
-    TIPOS_EVENTOS =  ['Teatro',
-        'Proyeccion audiovisual',
-        'Exposicion',
-        'Actividad infantil',
-        'Concierto',
-        'otros',
-        'Concurso',
-        'Conferencia',
-        'Danza',
-        'Curso-taller',
-        'Festivales (Gazteinformazioa)',
-        'Jornada',
-        'Bertsolarismo',
-        'Presentacion',
-        'Feria']
-    
-    tipo_evento = models.TextField(verbose_name='Tipo de Evento', choices=TIPOS_EVENTOS)
+        
+    tipo_evento = models.TextField(verbose_name='Tipo de Evento', help_text= "Tipo de evento")
 
     def __str__(self):
         return self.tipo_evento
@@ -54,7 +38,7 @@ class Evento(models.Model):
     nombre = models.TextField(verbose_name='Evento', help_text= "Nombre del evento")
     fecha_inicio = models.DateField(verbose_name='Fecha de Inicio', help_text = "Fecha de inicio ")
     fecha_fin = models.DateField(verbose_name='Fecha de Finalización ', help_text = "Fecha de finalización")
-    precio = models.DecimalField(verbose_name= 'Precio', help_text= "Precio" )
+    precio = models.DecimalField(verbose_name= 'Precio', help_text= "Precio", max_digits=5, decimal_places=2)
     municipio = models.ForeignKey(Municipio, on_delete=models.CASCADE)
     tipo_evento = models.ForeignKey(TipoEvento, on_delete= models.CASCADE)
     idiomas = models.ManyToManyField(Idioma)
