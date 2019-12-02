@@ -5,7 +5,7 @@ from datetime import datetime
 import csv
 
 # Create your tests here.
-def populate():
+def populateDatabase():
     #drops
     Municipios.objects.all().delete()
     TipoEvento.objects.all().delete()
@@ -45,4 +45,4 @@ def populateIdioma():
             Idioma.objects.create(idiomaId = i-1, idioma = csv_reader[i])
 
 
-populate():
+populateDatabase()
