@@ -3,10 +3,10 @@ from django.urls import path
 from main import views
 
 urlpatterns = [
-    path('ocupaciones_usuarios/',views.mostrar_ocupaciones),
-    path('puntuaciones_usuario/',views.mostrar_puntuaciones_usuario),
-    path('mejores_peliculas/',views.mostrar_mejores_peliculas),
-    path('busqueda_peliculas/',views.mostrar_peliculas_year),
+    path('eventos_fecha/',views.mostrar_eventos_fecha),
+    path('eventos_frecuentes/',views.mostrar_tiposMasUsado),
+    path('eventos_idioma/',views.mostrar_eventos_idioma),
+    path('municipios_eventos/',views.mostrar_eventos),
     path('',views.index),
     path('index.html/', views.index),
     path('populate/', views.populateDatabase),

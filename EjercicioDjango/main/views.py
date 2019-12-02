@@ -66,7 +66,7 @@ def mostrar_eventos_idioma(request):
         if formulario.is_valid():
             eventos = Evento.objects.filter(idioma=formulario.cleaned_data['idioma'])
             
-    return render(request, 'eventos_.html', {'formulario':formulario, 'eventos':eventos, 'STATIC_URL':settings.STATIC_URL})
+    return render(request, 'eventos_idioma.html', {'formulario':formulario, 'eventos':eventos, 'STATIC_URL':settings.STATIC_URL})
             
 
 
