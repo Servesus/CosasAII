@@ -15,7 +15,7 @@ import csv
 
 path = "data"
 
-def populateDatabase():
+def populateDatabase(request):
     #drops
     Municipios.objects.all().delete()
     TipoEvento.objects.all().delete()
