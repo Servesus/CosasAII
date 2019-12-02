@@ -1,6 +1,6 @@
 #encoding:utf-8
 from main.models import Evento
-from main.forms import  UsuarioBusquedaForm, PeliculaBusquedaYearForm
+from main.forms import EventosFechaForm, EventosIdiomaForm
 from django.shortcuts import render
 from django.db.models import Avg
 from django.http.response import HttpResponseRedirect, HttpResponse
@@ -44,7 +44,7 @@ def mostrar_tiposMasUsado(request):
     
     return render(request, "eventos_frecuentes.html",{"eventos":result, 'STATIC_URL':settings.STATIC_URL})
 
-    def mostrar_eventos_fecha(request):
+def mostrar_eventos_fecha(request):
     formulario = EventosFechaForm()
     eventos = None
     

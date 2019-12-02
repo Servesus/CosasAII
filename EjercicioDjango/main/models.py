@@ -25,23 +25,22 @@ class Municipio(models.Model):
 
 class TipoEvento(models.Model):
     
-     TIPOS_EVENTOS =  ['Teatro',
-    'Proyeccion audiovisual',
-    'Exposicion',
-    'Actividad infantil',
-    'Concierto',
-    'otros',
-    'Concurso',
-    'Conferencia',
-    'Danza',
-    'Curso-taller',
-    'Festivales (Gazteinformazioa)',
-    'Jornada',
-    'Bertsolarismo',
-    'Presentacion',
-    'Feria']
+    TIPOS_EVENTOS =  ['Teatro',
+        'Proyeccion audiovisual',
+        'Exposicion',
+        'Actividad infantil',
+        'Concierto',
+        'otros',
+        'Concurso',
+        'Conferencia',
+        'Danza',
+        'Curso-taller',
+        'Festivales (Gazteinformazioa)',
+        'Jornada',
+        'Bertsolarismo',
+        'Presentacion',
+        'Feria']
     
-    tipoEventoId = models.TextField(primary_key=True)
     tipo_evento = models.TextField(verbose_name='Tipo de Evento', choices=TIPOS_EVENTOS)
 
     def __str__(self):
