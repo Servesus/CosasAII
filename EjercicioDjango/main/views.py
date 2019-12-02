@@ -101,3 +101,5 @@ def mostrar_eventos_idioma(request):
             
     return render(request, 'eventos_idioma.html', {'formulario':formulario, 'eventos':eventos, 'STATIC_URL':settings.STATIC_URL})
         
+def index(request):
+    return render(request, 'index.html',{'STATIC_URL':settings.STATIC_URL})
