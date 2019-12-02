@@ -17,7 +17,7 @@ path = "data"
 
 def populateDatabase(request):
     #drops
-    Municipios.objects.all().delete()
+    Municipio.objects.all().delete()
     TipoEvento.objects.all().delete()
     Idioma.objects.all().delete()
     Evento.objects.all().delete()
@@ -37,19 +37,19 @@ def populateDatabase(request):
             municipio = Municipio.objects.get(municipio = csv_reader[i][6]))
 
 def populateMunicipios():
-    with open('municipio.csv') as csv_file:
+    with open(path+'\\municipio.csv') as csv_file:
         csv_reader = csv.reader(csv_file)
         for i in range(1, len(csv_reader)):
             Municipio.objects.create(municipioId = i-1, municipio = csv_reader[i])
 
 def populateTipoEvento():
-    with open('tipoevento.csv') as csv_file:
+    with open(path+'\\tipoevento.csv') as csv_file:
         csv_reader = csv.reader(csv_file)
         for i in range(1, len(csv_reader)):
             TipoEvento.objects.create(tipoEventoId = i-1, tipo_evento = csv_reader[i])
 
 def populateIdioma():
-    with open('lenguas.csv') as csv_file:
+    with open(path+'\\lenguas.csv') as csv_file:
         csv_reader = csv.reader(csv_file)
         for i in range(1, len(csv_reader)):
             Idioma.objects.create(idiomaId = i-1, idioma = csv_reader[i])
