@@ -9,7 +9,6 @@ urlpatterns = [
     path('municipios_eventos/',views.mostrar_eventos),
     path('',views.index),
     path('index.html/', views.index),
-    path('populate/', views.populateDatabase),
-    path('ingresar/', views.ingresar),    
+    path('populate/', views.populateDatabase),   
     path('admin/',admin.site.urls),
     ]
