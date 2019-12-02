@@ -1,5 +1,5 @@
 #encoding:utf-8
-from main.models import Usuario, Ocupacion, Puntuacion, Pelicula, Categoria
+from main.models import Evento
 from main.forms import  UsuarioBusquedaForm, PeliculaBusquedaYearForm
 from django.shortcuts import render
 from django.db.models import Avg
@@ -11,7 +11,40 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 
+import csv
+
 path = "data"
+
+def populate():
+    with open('dataset-B.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=';')
+        #for row in csv_reader:
+        return csv_reader
+
+def mostrar_eventos(request):
+    eventos = Evento.objects.all().order_by("municipio")
+    return render(request, "municipios_eventos.html",{"eventos":eventos, 'STATIC_URL':settings.STATIC_URL})
+
+def mostrar_tiposMasUsado(request):
+    tipoEventos = TipoEvento.objects.all()
+    tipo1, tipo2 = None, None
+    for i in range(len(tipoEventos)):
+        if tipo1 == None:
+            tipo1 == [tipoEventos[i][0],tipoEventos[i][1]]
+        elif tipo2 == None:
+            tipo2 == [tipoEventos[i][0],tipoEventos[i][1]]
+        else:
+            count = Evento.objects.all().filter(tipoEvento = tipoEvento[i][1]).count()
+            if count >= tipo1[0]:
+                tipo1 = [tipoEventos[i][0],tipoEventos[i][1]]
+            elif count >= tipo2[0]:
+                tipo2 = [tipoEventos[i][0],tipoEventos[i][1]]
+
+    result = [tipo1[1],tipo2[1]]
+    
+    return render(request, "eventos_frecuentes.html",{"eventos":result, 'STATIC_URL':settings.STATIC_URL})
+            
+
 
 #Funcion de acceso restringido que carga los datos en la BD  
 @login_required(login_url='/ingresar')
