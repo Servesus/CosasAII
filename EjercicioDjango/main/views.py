@@ -43,6 +43,30 @@ def mostrar_tiposMasUsado(request):
     result = [tipo1[1],tipo2[1]]
     
     return render(request, "eventos_frecuentes.html",{"eventos":result, 'STATIC_URL':settings.STATIC_URL})
+
+    def mostrar_eventos_fecha(request):
+    formulario = EventosFechaForm()
+    eventos = None
+    
+    if request.method=='POST':
+        formulario = EventosFechaForm(request.POST)
+        
+        if formulario.is_valid():
+            eventos = Evento.objects.filter(fecha_inicio=formulario.cleaned_data['fecha'])
+            
+    return render(request, 'eventos_fecha.html', {'formulario':formulario, 'eventos':eventos, 'STATIC_URL':settings.STATIC_URL})
+
+def mostrar_eventos_idioma(request):
+    formulario = EventosIdiomaForm()
+    eventos = None
+    
+    if request.method=='POST':
+        formulario = EventosFechaForm(request.POST)
+        
+        if formulario.is_valid():
+            eventos = Evento.objects.filter(idioma=formulario.cleaned_data['idioma'])
+            
+    return render(request, 'eventos_.html', {'formulario':formulario, 'eventos':eventos, 'STATIC_URL':settings.STATIC_URL})
             
 
 
