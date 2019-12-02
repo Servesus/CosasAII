@@ -29,12 +29,13 @@ def populateDatabase(request):
         csv_reader = list(csv.reader(csv_file, delimiter=';'))
         
         for i in range(1,len(csv_reader)):
+            print(csv_reader[i][1])
             Evento.objects.create(eventoId = i-1, nombre = csv_reader[i][0],
+            idioma = Idioma.objects.get(idioma = csv_reader[i][5]),
             tipo_evento = TipoEvento.objects.get(tipo_evento = csv_reader[i][1]),
             fecha_inicio = datetime.strptime(csv_reader[i][2], '%d/%m/%Y'),
             fecha_fin = datetime.strptime(csv_reader[i][3], '%d/%m/%Y'),
             precio = float(csv_reader[i][4]),
-            idioma = Idioma.objects.get(idioma = csv_reader[i][5]),
             municipio = Municipio.objects.get(municipio = csv_reader[i][6]))
 
 def populateMunicipios():
@@ -43,7 +44,6 @@ def populateMunicipios():
         row_count = sum(1 for row in csv_reader)
         for i in range(1, row_count):
             Municipio.objects.create(municipioId = i-1, municipio = csv_reader[i])
-    print("1")
 def populateTipoEvento():
     with open(path+'\\tipoevento.csv') as csv_file:
         csv_reader = list(csv.reader(csv_file))
