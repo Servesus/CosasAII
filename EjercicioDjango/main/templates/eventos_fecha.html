@@ -1,0 +1,33 @@
+{% extends 'master.html' %}
+
+{% block titulo %} Busqueda de eventos por fecha {% endblock %}
+
+{% block buscarUsuarioActiva %} uk-active {% endblock %}
+		    
+
+{% block contenido %} 
+    <div class="uk-animation-slide-bottom">
+    	<form class="uk-form" id="formulario" method="post" action=''>{% csrf_token %}
+    		<fieldset>
+    			<legend>Busqueda de Usuarios</legend>
+    			<input type="text" name="fecha" id="fecha" placeholder="dd/MM/YYYY"/>
+    			<br><br>
+    			<input class="uk-button" type='submit' value='Realizar Busqueda'/>
+    		</fieldset>
+    	</form>
+	    
+	    <hr>
+
+	    {% if  eventos %}
+		    <dl class="uk-description-list-line">
+
+			{% for row in eventos %}
+			    <dt>{{row.nombre}}</dt>
+			    <dd><strong>Nombre:</strong> {{row.nombre}} | <strong>Fecha Inicio:</strong> {{row.fecha_inicio}} | <strong>Fecha Fin:</strong> {{row.fecha_fin}} | <strong>Precio:</strong> {{row.precio}}</dd>
+			{% endfor %}
+
+			</dl>
+
+		{% endif %}
+	</div>
+{% endblock %}

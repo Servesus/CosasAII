@@ -1,6 +1,6 @@
 {% extends 'master.html' %}
 
-{% block titulo %} Busqueda de puntuaciones de usuario {% endblock %}
+{% block titulo %} Busqueda de eventos por idioma {% endblock %}
 
 {% block buscarUsuarioActiva %} uk-active {% endblock %}
 		    
@@ -10,7 +10,7 @@
     	<form class="uk-form" id="formulario" method="post" action=''>{% csrf_token %}
     		<fieldset>
     			<legend>Busqueda de Usuarios</legend>
-    			<input type="text" name="idUsuario" id="id_idUsuario" placeholder="Id del Usuario"/>
+    			<input type="text" name="idioma" id="idioma" placeholder="idioma"/>
     			<br><br>
     			<input class="uk-button" type='submit' value='Realizar Busqueda'/>
     		</fieldset>
@@ -18,13 +18,12 @@
 	    
 	    <hr>
 
-	    {% if puntuaciones %}
-		    <h3> Peliculas puntuadas por el usuario:  {{ puntuaciones|length }}</h3>
+	    {% if  eventos %}
 		    <dl class="uk-description-list-line">
 
-			{% for row in puntuaciones %}
-			    <dt>{{row.idPelicula.titulo}}</dt>
-			    <dd>Puntuacion: {{row.puntuacion}}/5</dd>
+			{% for row in eventos %}
+			    <dt>{{row.nombre}}</dt>
+			    <dd><strong>Nombre:</strong> {{row.nombre}} | <strong>Fecha Inicio:</strong> {{row.fecha_inicio}} | <strong>Fecha Fin:</strong> {{row.fecha_fin}} | <strong>Precio:</strong> {{row.precio}}</dd>
 			{% endfor %}
 
 			</dl>

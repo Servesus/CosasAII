@@ -1,0 +1,23 @@
+{% extends 'master.html' %}
+
+{% block titulo %} Lista de Eventos {% endblock %}
+
+
+
+{% block contenido %} 
+    <div class="uk-animation-fade">
+	    <div class="uk-accordion" data-uk-accordion="{collapse: false}">
+	    	{% regroup eventos by municipio as grouped %}
+	    	{% for group in grouped %}
+		    	<h3 class="uk-accordion-title">Municipio: {{group.grouper}} ({{group.list|length}} eventos)</h3>
+		    	<div class="uk-accordion-content">
+		    		<ul class="uk-list  uk-list-striped">
+		    		{% for user in group.list %}
+						<li><strong>Nombre:</strong> {{user.nombre}} | <strong>Fecha Inicio:</strong> {{user.fecha_inicio}} | <strong>Fecha Fin:</strong> {{user.fecha_fin}} | <strong>Precio:</strong> {{user.precio}}</li>
+					{% endfor %}
+				    </ul>
+		    	</div>
+	    	{% endfor %}
+		</div>
+	</div>
+{% endblock %}
