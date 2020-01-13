@@ -54,7 +54,7 @@ def recommendedBooksUser(request):
             books = []
             scores = []
             for re in recommended:
-                books.append(Book.objects.get(pk=re[1]))
+                books.append(Libro.objects.get(pk=re[1]))
                 scores.append(re[0])
             items= zip(books,scores)
             return render(request,'recommendationItems.html', {'idUsuario': idUser, 'items': items})
@@ -93,18 +93,23 @@ def similarBooks(request):
         form = BookForm(request.GET, request.FILES)
         if form.is_valid():
             idBook = form.cleaned_data['id']
-            book = get_object_or_404(Book, pk=idBook)
+            book = get_object_or_404(Libro, pk=idBook)
             shelf = shelve.open("dataRS.dat")
             ItemsPrefs = shelf['ItemsPrefs']
+            sim =  shelf['SimItems']
             shelf.close()
+            res = sim[idBook]
+            """
             recommended = topMatches(ItemsPrefs, int(idBook),n=2)
             books = []
             similar = []
             for re in recommended:
-                books.append(Book.objects.get(pk=re[1]))
+                books.append(Libro.objects.get(pk=re[1]))
                 similar.append(re[0])
             items= zip(books,similar)
-            return render(request,'similarBooks.html', {'book': book,'books': items})
+            """
+            #return render(request,'similarBooks.html', {'book': book,'books': items})
+            return render(request,'similarBooks.html', {'res':res})
     form = BookForm()
     return render(request,'search_book.html', {'form': form})
 
@@ -141,8 +146,8 @@ def search(request):
             #user = get_object_or_404(UserInformation, pk=idUser)
             booksVotedByUser = Puntuacion.objects.all().filter(userId=idUser)
             books = []
-            for ra in booksVotedByUser:
-                books.append(Book.objects.get(idBook=ra.book.id))
-            return render(request,'ratedBooks.html', {'idUsuario':idUser, 'books':books})
+            #for ra in booksVotedByUser:
+                #books.append(ra.)
+            return render(request,'ratedBooks.html', {'idUsuario':idUser, 'books':booksVotedByUser})
     form=UserForm()
     return render(request,'search_user.html', {'form':form })

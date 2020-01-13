@@ -3,14 +3,18 @@
 <title>Sistema de Recomendacion - Examen</title>
 </head>
 <body>
+
 {% include 'header.html' %}
 <h1>Libros Recomendados para el Usuario {{idUsuario}}</h1>
 {% for item, score in items %}
 <ul>
-<li>Book ID: {{item.bookId}}  Titulo:{{item.titulo}}  Autor:{{item.autor}}</li>
+<li>Book ID: {{item.id}}  Titulo:{{item.titulo}}  Autor:{{item.autor}}</li>
 </ul>
 {% empty %}
 <h2> Insufficient user data </h2>
 {% endfor %}
+
+
+    
 </body>
 </html>
