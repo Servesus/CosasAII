@@ -13,9 +13,9 @@ def loadDict():
     shelf = shelve.open("dataRS.dat")
     ratings = Puntuacion.objects.all()
     for ra in ratings:
-        user = int(ra.idUsuario)
-        itemid = int(ra.book)
-        rating = float(ra.puntuacion)
+        user = int(ra.userId)
+        itemid = int(ra.libro.id)
+        rating = float(ra.rating)
         Prefs.setdefault(user, {})
         Prefs[user][itemid] = rating
     shelf['Prefs']=Prefs
@@ -29,7 +29,7 @@ def loadDict():
 #  CONJUNTO DE VISTAS
 
 def index(request): 
-    return render(request,'index.html')
+    return render(request,'header.html')
 
 def populateDB(request):
     populateDatabase() 
@@ -139,7 +139,7 @@ def search(request):
         if form.is_valid():
             idUser = form.cleaned_data['id']
             #user = get_object_or_404(UserInformation, pk=idUser)
-            booksVotedByUser = Puntuacion.objects.all().filter(idUsuario=idUser)
+            booksVotedByUser = Puntuacion.objects.all().filter(userId=idUser)
             books = []
             for ra in booksVotedByUser:
                 books.append(Book.objects.get(idBook=ra.book.id))
