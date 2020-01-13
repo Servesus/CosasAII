@@ -17,7 +17,7 @@ class Libro(models.Model):
     
 class Puntuacion(models.Model):
     userId = models.PositiveIntegerField()
-    Libro = models.ForeignKey(Libro, on_delete=models.CASCADE)
+    libro = models.ForeignKey(Libro, on_delete=models.CASCADE)
     rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     def __str__(self):
         return str(self.rating)

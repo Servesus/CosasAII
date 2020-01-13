@@ -1,129 +1,42 @@
-from main.models import Occupation, Genre, UserInformation, Film, Rating
+from main.models import Libro,Puntuacion
 from datetime import datetime
+import csv
 
 path = "ml-100k"
 
 def deleteTables():  
-    Rating.objects.all().delete()
-    Film.objects.all().delete()
-    UserInformation.objects.all().delete()
-    Genre.objects.all().delete()
-    Occupation.objects.all().delete()
-    
-    
-def populateOccupations():
-    print("Loading occupations...")
-        
-    lista=[]
-    fileobj=open(path+"\\u.occupation", "r")
-    for line in fileobj.readlines():
-        lista.append(Occupation(occupationName=str(line.strip())))
-    fileobj.close()
-    Occupation.objects.bulk_create(lista)  # bulk_create hace la carga masiva para acelerar el proceso
-    
-    print("Occupations inserted: " + str(Occupation.objects.count()))
-    print("---------------------------------------------------------")
-    
-    
-
-def populateGenres():
-    print("Loading Movie Genres...")
-        
-    lista=[]
-    fileobj=open(path+"\\u.genre", "r")
-    for line in fileobj.readlines():
-        rip = line.split('|')
-        if len(rip) != 2:
-            continue
-        lista.append(Genre(id=int(rip[1].strip()), genreName=rip[0].strip()))
-    fileobj.close()
-    Genre.objects.bulk_create(lista)
-    
-    print("Genres inserted: " + str(Genre.objects.count()))
-    print("---------------------------------------------------------")
-
-
-def populateUsers():
-    print("Loading users...")
-       
-    lista=[]
-    dict={}
-    fileobj=open(path+"\\u.user", "r")
-    for line in fileobj.readlines():
-        rip = line.split('|')
-        if len(rip) != 5:
-            continue
-        id_u=int(rip[0].strip())
-        u=UserInformation(id=id_u, age=rip[1].strip(), gender=rip[2].strip(), occupation=Occupation.objects.get(occupationName=rip[3].strip()), zipCode=rip[4].strip())
-        lista.append(u)
-        dict[id_u]=u
-    fileobj.close()
-    UserInformation.objects.bulk_create(lista)
-    
-    print("Users inserted: " + str(UserInformation.objects.count()))
-    print("---------------------------------------------------------")
-    return(dict)
-
-
-def populateFilms():
-    print("Loading movies...")
-       
-    lista_peliculas =[]  # lista de peliculas
-    dict_categorias={}  #  diccionario de categorias de cada pelicula (idPelicula y lista de categorias)
-    fileobj=open(path+"\\u.item", "r")
-    for line in fileobj.readlines():
-        rip = line.split('|')
-        try:
-            date_rel = datetime.strptime(rip[2].strip(),'%d-%b-%Y')
-        except:
-            date_rel = datetime.strptime('01-Jan-1990','%d-%b-%Y')
-        try:
-            date_rel_video = datetime.strptime(rip[3].strip(),'%d-%b-%Y')
-        except:
-            date_rel_video = date_rel
-        id_pe = int(rip[0].strip())
-        lista_peliculas.append(Film(id=id_pe, movieTitle=rip[1].strip(), releaseDate=date_rel, releaseVideoDate=date_rel_video , IMDbURL=rip[4].strip()))
-        
-        lista_aux=[]
-        for i in range(5, len(rip)):
-            if rip [i] == '1':
-                lista_aux.append(Genre.objects.get(id = (i-5)))
-        dict_categorias[id_pe]=lista_aux
-    fileobj.close()    
-    Film.objects.bulk_create(lista_peliculas)
-
-    dict={}
-    for pelicula in Film.objects.all():
-        pelicula.genres.set(dict_categorias[pelicula.id])
-        dict[pelicula.id]=pelicula
-    
-    print("Movies inserted: " + str(Film.objects.count()))
-    print("---------------------------------------------------------")
-    return(dict)
-       
-def populateRatings(u,m):
-    print("Loading ratings...")
-    Rating.objects.all().delete()
-
-    lista=[]
-    fileobj=open(path+"\\u.data", "r")
-    for line in fileobj.readlines():
-        rip = line.split('\t')
-        lista.append(Rating(user=u[int(rip[0].strip())], film=m[int(rip[1].strip())], rating=int(rip[2].strip()), rateDate= datetime.fromtimestamp(int(rip[3].strip())) ))
-    fileobj.close()
-    Rating.objects.bulk_create(lista)
-    print("Ratings inserted: " + str(Rating.objects.count()))
-    print("---------------------------------------------------------")
+    Libro.objects.all().delete()
+    Puntuacion.objects.all().delete()
     
     
 def populateDatabase():
     deleteTables()
-    populateOccupations()
-    populateGenres()
-    u=populateUsers()
-    m=populateFilms()
-    populateRatings(u,m)
-    print("Finished database population")
-    
+    populateLibro()
+    populatePuntuacion()
+
 if __name__ == '__main__':
-    populateDatabase()
+    populateLibro()
+
+def populateLibro():
+    lista = []
+    with open(path+'\\bookfeatures.csv',encoding="latin-1") as csv_file:
+        csv_reader = list(csv.reader(csv_file, delimiter=';'))
+        for i in range(1,len(csv_reader)):
+            if len(csv_reader[i]) == 10 :
+                lista.append(Libro(id=csv_reader[i][0],titulo=csv_reader[i][1],autor=csv_reader[i][2],
+                genero=csv_reader[i][3],idioma=csv_reader[i][4],rating1=csv_reader[i][5],
+                rating2=csv_reader[i][6],rating3=csv_reader[i][7],rating4=csv_reader[i][8],rating5=csv_reader[i][9]))
+            else:
+                lista.append(Libro(id=csv_reader[i][0],titulo=csv_reader[i][1]+csv_reader[i][2],autor=csv_reader[i][3],
+                genero=csv_reader[i][4],idioma=csv_reader[i][5],rating1=csv_reader[i][6],
+                rating2=csv_reader[i][7],rating3=csv_reader[i][8],rating4=csv_reader[i][9],rating5=csv_reader[i][10]))
+        Libro.objects.bulk_create(lista)
+
+def populatePuntuacion():
+    lista = []
+    with open(path+'\\ratings.csv',encoding="latin-1") as csv_file:
+        csv_reader = list(csv.reader(csv_file, delimiter=';'))
+        for i in range(1,len(csv_reader)):
+            lista.append(Puntuacion(rating=csv_reader[i][0],libro = Libro.objects.get(id=csv_reader[i][2]),
+            userId = csv_reader[i][1]))
+        Puntuacion.objects.bulk_create(lista)

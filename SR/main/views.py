@@ -1,5 +1,5 @@
 import shelve
-from main.models import UserInformation, Film, Rating
+from main.models import Libro, Puntuacion
 from main.forms import UserForm, FilmForm
 from django.shortcuts import render, get_object_or_404
 from main.recommendations import  transformPrefs, calculateSimilarItems, getRecommendations, getRecommendedItems, topMatches
