@@ -1,13 +1,13 @@
 <html>
 <head>
-<title>Sistema de Recomendacion - Movielens</title>
+<title>Sistema de Recomendacion - Examen</title>
 </head>
 <body>
 {% include 'header.html' %}
-<h1>Peliculas Recomendadas para el Usuario {{user.id}}</h1>
+<h1>Libros Recomendados para el Usuario {{idUsuario}}</h1>
 {% for item, score in items %}
 <ul>
-<li>Title: {{item.movieTitle}}  Score:{{score | floatformat:"2"}}</li>
+<li>Book ID: {{item.bookId}}  Titulo:{{item.titulo}}  Autor:{{item.autor}}</li>
 </ul>
 {% empty %}
 <h2> Insufficient user data </h2>
