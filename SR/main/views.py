@@ -96,10 +96,8 @@ def similarBooks(request):
             book = get_object_or_404(Libro, pk=idBook)
             shelf = shelve.open("dataRS.dat")
             ItemsPrefs = shelf['ItemsPrefs']
-            sim =  shelf['SimItems']
             shelf.close()
-            res = sim[idBook]
-            """
+            
             recommended = topMatches(ItemsPrefs, int(idBook),n=2)
             books = []
             similar = []
@@ -107,9 +105,9 @@ def similarBooks(request):
                 books.append(Libro.objects.get(pk=re[1]))
                 similar.append(re[0])
             items= zip(books,similar)
-            """
-            #return render(request,'similarBooks.html', {'book': book,'books': items})
-            return render(request,'similarBooks.html', {'res':res})
+            
+            return render(request,'similarBooks.html', {'book': book,'books': items})
+            
     form = BookForm()
     return render(request,'search_book.html', {'form': form})
 
