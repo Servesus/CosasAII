@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import urllib.request
+import math
 from main.models import Game, Tag, Offer, User
 from datetime import datetime
 
@@ -37,16 +38,19 @@ def populateGames():
     f = urllib.request.urlopen("https://store.steampowered.com/games/#p=0&tab=ConcurrentUsers")
     s = BeautifulSoup(f,'html.parser')
 
-    s2 = s.find_all("span", id = "ConcurrentUsers_links")
-    s3 = s2.find_all("span", class_ = "paged_items_paging_pagelink")
-    count = int(s3[5].get_text())
+    s2 = s.find("span", id = "ConcurrentUsers_end")
+    s3 = s.find("span", id = "ConcurrentUsers_total")
+    itemsShowed = int(s2.get_text())
+    total = s3.get_text().split(",")
+    total = int(total[0]+total[1])
+    count = math.ceil(total/itemsShowed)
 
-    for i in range(0, count):
+    for i in range(0, count-1):
         path = "https://store.steampowered.com/games/#p=" + str(i) + "&tab=ConcurrentUsers"
         f = urllib.request.urlopen(path)
         s = BeautifulSoup(f,'html.parser')
 
-        s2 = s.find_all("div", id = "ConcurrentUsersRows")
+        s2 = s.find("div", id = "ConcurrentUsersRows")
         s3 = s2.find_all("a")
         for a in s3:
             tagList = []
@@ -54,11 +58,18 @@ def populateGames():
             gameId = a.get("data-ds-appid")
             name = a.find("div", class_ = "tab_item_name").get_text()
             tagsId = a.get("data-ds-tagids").strip('][').split(',')
-            for t in tagsId:
-                tagList.append(Tag.objects.get(int(t)))
 
-            g = Game(idGame=gameId, name=name, tags=tagList)
+            g = Game(idGame=gameId, name=name)
             g.save()
+            #g.tags.set(tagList)
+            for t in tagsId:
+                tId = int(t)
+                tag = Tag.objects.get(pk=tId)
+                g.tags.add(tag)
+                g.save()
+                #tagList.append(tag)
+
+            tags = g.tags
 
             price = a.find("div", class_ = "discount_final_price").get_text()
             if(price=="Free to Play"):
