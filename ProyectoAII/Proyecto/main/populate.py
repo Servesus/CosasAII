@@ -76,7 +76,7 @@ def populateGames():
     
     
 def populateGamesDatabase():
-    #deleteGamesTables()
+    deleteGamesTables()
     populateTags()
     populateGames()
     print("Finished database population")
