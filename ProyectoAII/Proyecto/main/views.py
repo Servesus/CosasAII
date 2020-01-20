@@ -168,3 +168,35 @@ def searchTag(request):
         else:
             form=UserForm()
             return render(request,'search_tag.html', {'form':form })
+
+def instantgaming(juego):
+    nombres = []
+    links = []
+    descuentos = []
+    precios = []
+    imagenes = []
+    site = "https://www.instant-gaming.com/en/search/?q="+str(juego)
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = Request(site,headers=hdr)
+    page = urlopen(req)
+    soup = BeautifulSoup(page)
+    juegos = soup.find("div",class_="search")
+    for juego in juegos:
+        if isinstance(juego, NavigableString):
+            continue
+        nombre = juego.find("div",class_="name").string
+        nombres.append(nombre)
+        a = juego.find("a")
+        link = a.get("href")
+        links.append(link)
+        try:
+            descuento = a.find("div",class_="discount").string
+        except:
+            descuento = "0%"
+        descuentos.append(descuento)
+        precio = a.find("div", class_="price").string
+        precios.append(precio)
+        imagen = a.find("img").get("src")
+        imagenes.append(imagen)
+        
+    return nombres,links,descuentos,imagenes
