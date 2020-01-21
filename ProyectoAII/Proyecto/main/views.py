@@ -137,35 +137,25 @@ def recommendedUsersFilms(request):
 def search(request):
     if request.method=='GET':
         form = GameForm(request.GET, request.FILES)
-        #games = Game.objects.count()
         if form.is_valid():
             name = form.cleaned_data['name']
-            #g = Game.objects.filter(name__contains=name)
-            #game = [item for item in g]
+            nombres,links,imagenes,precios,s = offers(name)
             """
-            if len(game) == 0:
-                form=GameForm()
-                return render(request,'search_game.html', {'form':form })
-            elif len(game) == 1:
-                prices(request, game.idGame)
-                #return render(request,'offer_list.html', {'offers':offers })
-            else:
+            return render(request, 'offers.html', 
+                {'nombres': nombres, 'links': links, 'imagenes': imagenes, 'precios': precios, 'site': s, 'range': range(len(s))})
             """
-            prices(request, name)
-            return render(request,'games.html', {'name':name})
-
+            lst = [{'item1': t[0], 'item2': t[1], 'item3':t[2], 'item4': t[3], 'item5': t[4]} for t in zip(nombres,links,imagenes,precios,s)]
+            return render(request, 'offers.html', {'lst': lst})
         else:
             form=GameForm()
             return render(request,'search_game.html', {'form':form })
 
 
-def prices(request, name):
-    if request.method=='GET':
-        #game = Game.objects.get(idGame=idGame)
-        nombres,links,imagenes = instantgaming(name)
-        print(nombres)
-        print(links)
-        print(imagenes)
+def offers(name):
+    nombres,links,imagenes,precios,s = [],[],[],[],[]
+    instantgaming(name, nombres, links, imagenes, precios, s)
+    g2a(name, nombres, links, imagenes, precios, s)
+    return nombres,links,imagenes,precios,s
 
 
 def searchTag(request):
@@ -185,28 +175,69 @@ def searchTag(request):
             form=UserForm()
             return render(request,'search_tag.html', {'form':form })
 
-def instantgaming(juego):
-    nombres = []
-    links = []
-    precios = []
-    imagenes = []
-    site = "https://www.instant-gaming.com/en/search/?q="+str(juego.replace(' ', '%20'))
-    hdr = {'User-Agent': 'Mozilla/5.0'}
-    req = Request(site,headers=hdr)
-    page = urlopen(req)
-    soup = BeautifulSoup(page)
-    juegos = soup.find("div",class_="search")
-    for juego in juegos:
-        if isinstance(juego, NavigableString):
-            continue
-        nombre = juego.find("div",class_="name").string
-        nombres.append(nombre)
-        a = juego.find("a")
-        link = a.get("href")
-        links.append(link)
-        precio = a.find("div", class_="price").string
-        precios.append(precio)
-        imagen = a.find("img").get("src")
-        imagenes.append(imagen)
-        
-    return nombres,links,imagenes
+def instantgaming(juego, nombres, links, imagenes, precios, s):
+    try:
+        site = "https://www.instant-gaming.com/en/search/?q="+str(juego.replace(' ', '%20'))
+        hdr = {'User-Agent': 'Mozilla/5.0'}
+        req = Request(site,headers=hdr)
+        page = urlopen(req)
+        soup = BeautifulSoup(page)
+        juegos = soup.find("div",class_="search")
+        for juego in juegos:
+            if isinstance(juego, NavigableString):
+                continue
+            nombre = juego.find("div",class_="name").string
+            a = juego.find("a")
+            link = a.get("href")
+            precio = a.find("div", class_="price").string.strip('\n').strip('€')
+            try:
+                p = float(precio)
+            except:
+                p = 'N/A'
+            imagen = a.find("img").get("src")
+
+            nombres.append(nombre)
+            links.append(link)
+            precio.append(p)
+            imagenes.append(imagen)
+            s.append("Instant Gaming")
+    except:
+        pass
+
+def g2a(busqueda, nombres, links, imagenes, precios, s):
+    try:
+        site = "https://www.g2a.com/search?query="+str(busqueda.replace(' ', '%20'))
+        hdr = {"authority": "www.g2a.com",
+                "method": "GET",
+                "path": "/search?query=gta",
+                "scheme": "https",
+                "accept-language": "es-ES,es;q=0.9,en;q=0.8",
+                "referer": "https://www.g2a.com",
+                "sec-fetch-mode": "navigate",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36"
+        }
+        req = Request(site,headers=hdr)
+        page = urlopen(req)
+        soup = BeautifulSoup(page,'html.parser')
+        juegos = soup.find("ul",class_="products-grid")
+        for juego in juegos:
+            card_media = juego.find("div",class_="Card__media")
+            link = "https://www.g2a.com" + card_media.a.get("href")
+            try:
+                req2 = Request(link, headers=hdr)
+                page2 = urlopen(req2)
+                soup2 = BeautifulSoup(page2, 'html.parser')
+                imagen = soup2.find('img', class_="lazy-image__img").get('data-src')
+            except:
+                imagen = ""
+            nombre = juego.find("h3",class_="Card__title").a.string
+            tags_precio = juego.find("div",class_="Card__body").find("div",class_="Card__footer").find("div",class_="Card__price").find("span",class_="Card__price-cost price")
+            precio = str(tags_precio).split(">")[1].split("<")[0]
+            
+            nombres.append(nombre)
+            links.append(link)
+            precios.append(float(precio))
+            imagenes.append(imagen)
+            s.append("G2A")
+    except:
+        pass
