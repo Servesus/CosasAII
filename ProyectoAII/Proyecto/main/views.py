@@ -1,9 +1,9 @@
 import shelve
-from main.models import User, Game, Offer, Tag
+from main.models import User, Game, Tag
 from main.forms import UserForm, GameForm, TagForm
 from django.shortcuts import render, get_object_or_404
 from main.recommendations import  transformPrefs, calculateSimilarItems, getRecommendations, getRecommendedItems, topMatches
-from main.populate import populateGamesDatabase
+from main.populate import populateDatabase
 
 """
 # Funcion que carga en el diccionario Prefs todas las puntuaciones de usuarios a peliculas. Tambien carga el diccionario inverso y la matriz de similitud entre items
@@ -32,7 +32,7 @@ def index(request):
     return render(request,'index.html')
 
 def populateDB(request):
-    populateGamesDatabase() 
+    populateDatabase() 
     return render(request,'populate.html')
 
 """
@@ -135,6 +135,7 @@ def recommendedUsersFilms(request):
 def search(request):
     if request.method=='GET':
         form = GameForm(request.GET, request.FILES)
+        games = Game.objects.count()
         if form.is_valid():
             name = form.cleaned_data['name']
             game = Game.objects.filter(name__contains=name)

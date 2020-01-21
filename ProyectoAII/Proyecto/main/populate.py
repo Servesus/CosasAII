@@ -1,96 +1,135 @@
-from bs4 import BeautifulSoup
-import urllib.request
-import math
-from main.models import Game, Tag, Offer, User
+from main.models import User, Game, Tag
 from datetime import datetime
+import csv
 
-def deleteGamesTables():
-    Offer.objects.all().delete()
+path = "steam"
+
+def deleteTables():  
+    User.objects.all().delete()
     Tag.objects.all().delete()
     Game.objects.all().delete()
 
-def deleteUsers():
-    User.objects.all().delete()
-
-
-def populateTags():
-    print("Loading tags...")
-    tagList = []
-    f = urllib.request.urlopen("https://store.steampowered.com/tag/browse/#global_492")
-    s = BeautifulSoup(f,'html.parser')
-
-    s2 = s.find("div", id = "tag_browse_global")
-    tags = s2.find_all("div", class_ = "tag_browse_tag")
-
-    for t in tags:
-        tagId = t.get("data-tagid")
-        name = t.get_text()
-
-        tagList.append(Tag(idTag=tagId, name=name))
-
-    Tag.objects.bulk_create(tagList)
-    print("Tags inserted: " + str(Tag.objects.count()))
-    print("---------------------------------------------------------")
-
-
+    
 def populateGames():
     print("Loading games...")
-    f = urllib.request.urlopen("https://store.steampowered.com/games/#p=0&tab=ConcurrentUsers")
-    s = BeautifulSoup(f,'html.parser')
-
-    s2 = s.find("span", id = "ConcurrentUsers_end")
-    s3 = s.find("span", id = "ConcurrentUsers_total")
-    itemsShowed = int(s2.get_text())
-    total = s3.get_text().split(",")
-    total = int(total[0]+total[1])
-    count = math.ceil(total/itemsShowed)
-
-    for i in range(0, count-1):
-        path = "https://store.steampowered.com/games/#p=" + str(i) + "&tab=ConcurrentUsers"
-        f = urllib.request.urlopen(path)
-        s = BeautifulSoup(f,'html.parser')
-
-        s2 = s.find("div", id = "ConcurrentUsersRows")
-        s3 = s2.find_all("a")
-        for a in s3:
-            tagList = []
-            href = a.get("href")
-            gameId = a.get("data-ds-appid")
-            name = a.find("div", class_ = "tab_item_name").get_text()
-            tagsId = a.get("data-ds-tagids").strip('][').split(',')
-
-            g = Game(idGame=gameId, name=name)
+        
+    with open(path+"\\steam.csv", encoding="utf8") as csv_file:
+        csv_reader = list(csv.reader(csv_file, delimiter=','))
+        for i in range(1, 5000):
+            row = csv_reader[i]
+            tags = []
+            g = Game(idGame=row[0], name=row[1])
             g.save()
-            #g.tags.set(tagList)
-            for t in tagsId:
-                tId = int(t)
-                tag = Tag.objects.get(pk=tId)
-                g.tags.add(tag)
-                g.save()
-                #tagList.append(tag)
+            g.tags.clear()
+            tagNames = row[10].split(';')
+            for t in tagNames:
+                tag, _ = Tag.objects.get_or_create(name=t)
+                tags.append(tag)
 
-            tags = g.tags
-
-            price = a.find("div", class_ = "discount_final_price").get_text()
-            if(price=="Free to Play"):
-                p = 0.0
-            else:
-                price = price.strip("€").replace(",", ".")
-                p = float(price)
-
-            o = Offer(offerURL=href, price=p, site="Steam", game=g)
-            o.save()
-
-
+            g.tags.set(tags)
+            g.save()
+            print("Added game " + str(i) + "/" + str(len(csv_reader)))
+    
     print("Games inserted: " + str(Game.objects.count()))
+    print("Tags inserted: " + str(Tag.objects.count()))
     print("---------------------------------------------------------")
     
     
-def populateGamesDatabase():
-    deleteGamesTables()
-    populateTags()
+"""
+def populateGenres():
+    print("Loading Movie Genres...")
+        
+    lista=[]
+    fileobj=open(path+"\\u.genre", "r")
+    for line in fileobj.readlines():
+        rip = line.split('|')
+        if len(rip) != 2:
+            continue
+        lista.append(Genre(id=int(rip[1].strip()), genreName=rip[0].strip()))
+    fileobj.close()
+    Genre.objects.bulk_create(lista)
+    
+    print("Genres inserted: " + str(Genre.objects.count()))
+    print("---------------------------------------------------------")
+
+
+def populateUsers():
+    print("Loading users...")
+       
+    lista=[]
+    dict={}
+    fileobj=open(path+"\\u.user", "r")
+    for line in fileobj.readlines():
+        rip = line.split('|')
+        if len(rip) != 5:
+            continue
+        id_u=int(rip[0].strip())
+        u=UserInformation(id=id_u, age=rip[1].strip(), gender=rip[2].strip(), occupation=Occupation.objects.get(occupationName=rip[3].strip()), zipCode=rip[4].strip())
+        lista.append(u)
+        dict[id_u]=u
+    fileobj.close()
+    UserInformation.objects.bulk_create(lista)
+    
+    print("Users inserted: " + str(UserInformation.objects.count()))
+    print("---------------------------------------------------------")
+    return(dict)
+
+
+def populateFilms():
+    print("Loading movies...")
+       
+    lista_peliculas =[]  # lista de peliculas
+    dict_categorias={}  #  diccionario de categorias de cada pelicula (idPelicula y lista de categorias)
+    fileobj=open(path+"\\u.item", "r")
+    for line in fileobj.readlines():
+        rip = line.split('|')
+        try:
+            date_rel = datetime.strptime(rip[2].strip(),'%d-%b-%Y')
+        except:
+            date_rel = datetime.strptime('01-Jan-1990','%d-%b-%Y')
+        try:
+            date_rel_video = datetime.strptime(rip[3].strip(),'%d-%b-%Y')
+        except:
+            date_rel_video = date_rel
+        id_pe = int(rip[0].strip())
+        lista_peliculas.append(Film(id=id_pe, movieTitle=rip[1].strip(), releaseDate=date_rel, releaseVideoDate=date_rel_video , IMDbURL=rip[4].strip()))
+        
+        lista_aux=[]
+        for i in range(5, len(rip)):
+            if rip [i] == '1':
+                lista_aux.append(Genre.objects.get(id = (i-5)))
+        dict_categorias[id_pe]=lista_aux
+    fileobj.close()    
+    Film.objects.bulk_create(lista_peliculas)
+
+    dict={}
+    for pelicula in Film.objects.all():
+        pelicula.genres.set(dict_categorias[pelicula.id])
+        dict[pelicula.id]=pelicula
+    
+    print("Movies inserted: " + str(Film.objects.count()))
+    print("---------------------------------------------------------")
+    return(dict)
+       
+def populateRatings(u,m):
+    print("Loading ratings...")
+    Rating.objects.all().delete()
+
+    lista=[]
+    fileobj=open(path+"\\u.data", "r")
+    for line in fileobj.readlines():
+        rip = line.split('\t')
+        lista.append(Rating(user=u[int(rip[0].strip())], film=m[int(rip[1].strip())], rating=int(rip[2].strip()), rateDate= datetime.fromtimestamp(int(rip[3].strip())) ))
+    fileobj.close()
+    Rating.objects.bulk_create(lista)
+    print("Ratings inserted: " + str(Rating.objects.count()))
+    print("---------------------------------------------------------")
+"""   
+    
+def populateDatabase():
+    deleteTables()
     populateGames()
     print("Finished database population")
     
 if __name__ == '__main__':
-    populateGamesDatabase()
+    populateDatabase()
