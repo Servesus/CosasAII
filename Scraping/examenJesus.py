@@ -113,6 +113,28 @@ def eneba(busqueda):
         links.append(link)
         precios.append(precio)
         imagenes.append(imagenes)
-        return nombres,links,precios,imagenes
+    return nombres,links,precios,imagenes
+
+
+def gamersgate(juego):
+    page = urlopen("https://es.gamersgate.com/games?prio=relevance&q=%22+"+juego)
+    nombres = []
+    links = []
+    precios = []
+    imagenes = []
+    soup = BeautifulSoup(page.read().decode("utf-8"))
+    juegos = soup.find("ul",class_="biglist")
+    for juego in juegos:
+        nombre = juego.find("div", class_="f_left with_two_rows").a.get("title").replace("™","").replace("®","")
+        link = juego.find("div", class_="f_left with_two_rows").a.get("href")
+        precio = juego.find_all("div", class_="f_right")[1].span.string
+        imagen = juego.find_all("div", class_="f_left")[0].a.img.get("alt")
+        nombres.append(nombre)
+        links.append(link)
+        precios.append(precio)
+        imagenes.append(imagenes)
+    return nombres,links,precios,imagenes
+    
+
  
     
