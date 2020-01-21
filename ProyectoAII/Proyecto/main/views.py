@@ -153,8 +153,12 @@ def search(request):
 
 def offers(name):
     nombres,links,imagenes,precios,s = [],[],[],[],[]
+
     instantgaming(name, nombres, links, imagenes, precios, s)
+    eneba(name, nombres, links, imagenes, precios, s)
+    #gamersgate(name, nombres, links, imagenes, precios, s)
     g2a(name, nombres, links, imagenes, precios, s)
+
     return nombres,links,imagenes,precios,s
 
 
@@ -241,3 +245,47 @@ def g2a(busqueda, nombres, links, imagenes, precios, s):
             s.append("G2A")
         except:
             pass
+
+def eneba(busqueda, nombres, links, imagenes, precios, s):
+    site = "https://www.eneba.com/search?page=1&text="+busqueda+"&types[]=game"
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = Request(site,headers=hdr)
+    page = urlopen(req)
+    soup = BeautifulSoup(page, 'html.parser')
+    s2 = soup.find("div",class_="_1tD0CW").section.div
+    juegos = s2.contents[1].contents
+    for juego in juegos:
+        try:
+            imagen = juego.find("div",class_="_2vZ2Ja _1p1I8b").find("img").get("src")
+            nombre = juego.find("div",class_="_2vZ2Ja _1p1I8b").find("img").get("alt")
+            link = "https://www.eneba.com" + str(juego.find("div",class_="_12ISZC").a.get("href"))
+            p = str(juego.find("div",class_="d6Cxnh").find_all("span",class_="_3RZkEb"))
+            p2 = p.split('€')
+            p3 = p2[1].split('<')
+            precio = p3[0]
+
+            nombres.append(nombre)
+            links.append(link)
+            precios.append(float(precio))
+            imagenes.append(imagen)
+            s.append("Eneba")
+        except:
+            pass
+
+
+def gamersgate(juego, nombres, links, imagenes, precios, s):
+    site = "https://es.gamersgate.com/games?prio=relevance&q=%22+" + juego
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = Request(site,headers=hdr)
+    page = urlopen(req)
+    soup = BeautifulSoup(page, 'html.parser')
+    juegos = soup.find("ul",class_="biglist")
+    for juego in juegos:
+        nombre = juego.find("div", class_="f_left with_two_rows").a.get("title").replace("™","").replace("®","")
+        link = juego.find("div", class_="f_left with_two_rows").a.get("href")
+        precio = juego.find_all("div", class_="f_right")[1].span.string
+        imagen = juego.find_all("div", class_="f_left")[0].a.img.get("alt")
+        nombres.append(nombre)
+        links.append(link)
+        precios.append(precio)
+        imagenes.append(imagen)
