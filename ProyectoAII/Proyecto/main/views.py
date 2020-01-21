@@ -1,9 +1,11 @@
 import shelve
 from main.models import User, Game, Tag
-from main.forms import UserForm, GameForm, TagForm
+from main.forms import GameForm, TagForm
 from django.shortcuts import render, get_object_or_404
 from main.recommendations import  transformPrefs, calculateSimilarItems, getRecommendations, getRecommendedItems, topMatches
 from main.populate import populateDatabase
+from urllib.request import urlopen,Request
+from bs4 import BeautifulSoup,NavigableString
 
 """
 # Funcion que carga en el diccionario Prefs todas las puntuaciones de usuarios a peliculas. Tambien carga el diccionario inverso y la matriz de similitud entre items
@@ -135,22 +137,35 @@ def recommendedUsersFilms(request):
 def search(request):
     if request.method=='GET':
         form = GameForm(request.GET, request.FILES)
-        games = Game.objects.count()
+        #games = Game.objects.count()
         if form.is_valid():
             name = form.cleaned_data['name']
-            game = Game.objects.filter(name__contains=name)
+            #g = Game.objects.filter(name__contains=name)
+            #game = [item for item in g]
+            """
             if len(game) == 0:
-                form=UserForm()
-                return render(request,'search_user.html', {'form':form })
+                form=GameForm()
+                return render(request,'search_game.html', {'form':form })
             elif len(game) == 1:
-                offers = Offer.objects.get(idGame=game.idGame)
-                return render(request,'offer_list.html', {'offers':offers })
+                prices(request, game.idGame)
+                #return render(request,'offer_list.html', {'offers':offers })
             else:
-                return render(request,'games.html', {'games':game })
+            """
+            prices(request, name)
+            return render(request,'games.html', {'name':name})
 
         else:
-            form=UserForm()
-            return render(request,'search_user.html', {'form':form })
+            form=GameForm()
+            return render(request,'search_game.html', {'form':form })
+
+
+def prices(request, name):
+    if request.method=='GET':
+        #game = Game.objects.get(idGame=idGame)
+        nombres,links,imagenes = instantgaming(name)
+        print(nombres)
+        print(links)
+        print(imagenes)
 
 
 def searchTag(request):
@@ -173,10 +188,9 @@ def searchTag(request):
 def instantgaming(juego):
     nombres = []
     links = []
-    descuentos = []
     precios = []
     imagenes = []
-    site = "https://www.instant-gaming.com/en/search/?q="+str(juego)
+    site = "https://www.instant-gaming.com/en/search/?q="+str(juego.replace(' ', '%20'))
     hdr = {'User-Agent': 'Mozilla/5.0'}
     req = Request(site,headers=hdr)
     page = urlopen(req)
@@ -190,14 +204,9 @@ def instantgaming(juego):
         a = juego.find("a")
         link = a.get("href")
         links.append(link)
-        try:
-            descuento = a.find("div",class_="discount").string
-        except:
-            descuento = "0%"
-        descuentos.append(descuento)
         precio = a.find("div", class_="price").string
         precios.append(precio)
         imagen = a.find("img").get("src")
         imagenes.append(imagen)
         
-    return nombres,links,descuentos,imagenes
+    return nombres,links,imagenes

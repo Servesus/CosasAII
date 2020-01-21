@@ -10,5 +10,6 @@ urlpatterns = [
     #path('loadRS', views.loadRS),
     #path('similarGames', views.similarGames),
     path('search', views.search),
+    path('prices/<str:idGame>', views.prices),
     path('admin/', admin.site.urls),
 ]
