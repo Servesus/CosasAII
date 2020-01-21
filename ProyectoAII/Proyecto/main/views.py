@@ -176,14 +176,14 @@ def searchTag(request):
             return render(request,'search_tag.html', {'form':form })
 
 def instantgaming(juego, nombres, links, imagenes, precios, s):
-    try:
-        site = "https://www.instant-gaming.com/en/search/?q="+str(juego.replace(' ', '%20'))
-        hdr = {'User-Agent': 'Mozilla/5.0'}
-        req = Request(site,headers=hdr)
-        page = urlopen(req)
-        soup = BeautifulSoup(page)
-        juegos = soup.find("div",class_="search")
-        for juego in juegos:
+    site = "https://www.instant-gaming.com/en/search/?q="+str(juego.replace(' ', '%20'))
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = Request(site,headers=hdr)
+    page = urlopen(req)
+    soup = BeautifulSoup(page)
+    juegos = soup.find("div",class_="search")
+    for juego in juegos:
+        try:
             if isinstance(juego, NavigableString):
                 continue
             nombre = juego.find("div",class_="name").string
@@ -198,29 +198,29 @@ def instantgaming(juego, nombres, links, imagenes, precios, s):
 
             nombres.append(nombre)
             links.append(link)
-            precio.append(p)
+            precios.append(p)
             imagenes.append(imagen)
             s.append("Instant Gaming")
-    except:
-        pass
+        except:
+            pass
 
 def g2a(busqueda, nombres, links, imagenes, precios, s):
-    try:
-        site = "https://www.g2a.com/search?query="+str(busqueda.replace(' ', '%20'))
-        hdr = {"authority": "www.g2a.com",
-                "method": "GET",
-                "path": "/search?query=gta",
-                "scheme": "https",
-                "accept-language": "es-ES,es;q=0.9,en;q=0.8",
-                "referer": "https://www.g2a.com",
-                "sec-fetch-mode": "navigate",
-                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36"
-        }
-        req = Request(site,headers=hdr)
-        page = urlopen(req)
-        soup = BeautifulSoup(page,'html.parser')
-        juegos = soup.find("ul",class_="products-grid")
-        for juego in juegos:
+    site = "https://www.g2a.com/search?query="+str(busqueda.replace(' ', '%20'))
+    hdr = {"authority": "www.g2a.com",
+            "method": "GET",
+            "path": "/search?query=gta",
+            "scheme": "https",
+            "accept-language": "es-ES,es;q=0.9,en;q=0.8",
+            "referer": "https://www.g2a.com",
+            "sec-fetch-mode": "navigate",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36"
+    }
+    req = Request(site,headers=hdr)
+    page = urlopen(req)
+    soup = BeautifulSoup(page,'html.parser')
+    juegos = soup.find("ul",class_="products-grid")
+    for juego in juegos:
+        try:
             card_media = juego.find("div",class_="Card__media")
             link = "https://www.g2a.com" + card_media.a.get("href")
             try:
@@ -239,5 +239,5 @@ def g2a(busqueda, nombres, links, imagenes, precios, s):
             precios.append(float(precio))
             imagenes.append(imagen)
             s.append("G2A")
-    except:
-        pass
+        except:
+            pass
