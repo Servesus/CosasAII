@@ -6,6 +6,7 @@ import sqlite3
 import re
 
 
+
 """
 def extraer():
     nombres = []
@@ -88,4 +89,30 @@ def g2a(busqueda):
         return nombres,links,precios,imagenes
         
 
-g2a("gta")
+def eneba(busqueda):
+    nombres = []
+    links = []
+    precios = []
+    imagenes = []
+    site = "https://www.eneba.com/search?page=1&text="+busqueda+"&types[]=game"
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    req = Request(site,headers=hdr)
+    page = urlopen(req)
+    soup = BeautifulSoup(page)
+    juegos = soup.find("div",class_="_3M7T08")
+    for juego in juegos:
+        imagen = juego.find("div",class_="_2vZ2Ja _1p1I8b").find("img").get("src")
+        nombre = juego.find("div",class_="_2vZ2Ja _1p1I8b").find("img").get("alt")
+        link = "https://www.eneba.com" + str(juego.find("div",class_="_12ISZC").a.get("href"))
+        precios = juego.find("div",class_="d6Cxnh").find_all("span",class_="_3RZkEb")
+        if len(precios) == 1:
+            precio = precios[0].string
+        else:
+            precio = precios[1].string
+        nombres.append(nombre)
+        links.append(link)
+        precios.append(precio)
+        imagenes.append(imagenes)
+        return nombres,links,precios,imagenes
+ 
+    
