@@ -1,17 +1,15 @@
 <html>
 <head>
 <title>Comparador de precios de claves</title>
-<style>
-    table, th, td {
-      border: 1px solid black;
-    }
-    </style>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body>
 {% include 'header.html' %}
-<section>
+<div class="container">
 <h1>Resultados</h1>
-<table>
+<table class="table" id ="myTable">
 <tr>
     <th></th>
     <th>Nombre</th>
@@ -31,6 +29,6 @@
 <h2> No se han encontrado ofertas referentes a la busqueda realizada </h2>
 {% endfor %}
 </table>
-</section>
+</div>
 </body>
 </html>
