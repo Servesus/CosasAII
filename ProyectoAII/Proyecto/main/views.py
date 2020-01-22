@@ -1,6 +1,6 @@
 from main.models import User, Game, Tag
-from main.forms import GameForm, TagForm
-from main.recommendations import load, recommend
+from main.forms import GameForm
+from main.recommendations import load
 from django.shortcuts import render, get_object_or_404
 from main.populate import populateDatabase
 from urllib.request import urlopen,Request
