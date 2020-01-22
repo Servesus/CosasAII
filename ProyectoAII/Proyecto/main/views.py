@@ -5,68 +5,9 @@ from django.shortcuts import render, get_object_or_404
 from main.populate import populateDatabase
 from urllib.request import urlopen,Request
 from bs4 import BeautifulSoup,NavigableString
-from rake_nltk import Rake
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 import csv
-
-"""
-def CBRecommendationSystem(request):
-    title = "Counter-Strike: Global Offensive"
-    cosine_sim, gameDict = CBRecommendationMatrix()
-    recommendations(title, cosine_sim, gameDict)
-
-def recommendations(title, cosine_sim, gameDict):
-    
-    # initializing the empty list of recommended movies
-    recommended_games = []
-    keys = list(gameDict.keys())
-    
-    # gettin the index of the movie that matches the title
-    idx = keys.index(title)
-
-    # creating a Series with the similarity scores in descending order
-    a = list(cosine_sim[idx])
-    ascendingValues = a.copy()
-    ascendingValues.sort(reverse=True)
-    ascendingValues = list(dict.fromkeys(ascendingValues))
-    for i in ascendingValues:
-        names = a.index(i)
-        for n in names:
-            recommended_games.append(n)
-            if len(recommended_games)==10:
-                break
-        if len(recommended_games)==10:
-                break
-    
-    score_series = pd.Series(cosine_sim[idx]).sort_values(ascending = False)
-
-    # getting the indexes of the 10 most similar movies
-    top_10_indexes = list(score_series.iloc[1:11].index)
-    
-    # populating the list with the titles of the best 10 matching movies
-    for i in top_10_indexes:
-        recommended_movies.append(list(df.index)[i])
-        
-    return recommended_games
-
-def CBRecommendationMatrix():
-    gameDict = {} 
-    games = Game.objects.all()
-    for g in games:
-        tags = list(g.tags.all())
-        tagNames = ""
-        for t in tags:
-            tagNames = tagNames + t.name + ", "
-        gameDict[g.name] = tagNames
-
-    tf = TfidfVectorizer()
-    tfidf_matrix = tf.fit_transform(gameDict.values())
-
-    cosine_similarities = linear_kernel(tfidf_matrix, tfidf_matrix)
-
-    return cosine_similarities, gameDict
-"""
 
 #  CONJUNTO DE VISTAS
 
@@ -127,114 +68,6 @@ def CBRecommendationSystem(request, idGame):
     
     return render(request,'result.html', {'games':games, 'name':name })
 
-"""
-def loadRS(request):
-    gameDict = {} 
-    games = Game.objects.all()
-    for g in games:
-        tags = list(g.tags.all())
-        tagNames = ""
-        for t in tags:
-            tagNames = tagNames + t.name + ", "
-        gameDict[g.name] = tagNames
-
-    tf = TfidfVectorizer()
-    tfidf_matrix = tf.fit_transform(gameDict.values())
-
-    cosine_similarities = linear_kernel(tfidf_matrix, tfidf_matrix)
-
-    return render(request,'loadRS.html')
-"""
-"""
-# APARTADO A
-def recommendedFilmsUser(request):
-    if request.method=='GET':
-        form = UserForm(request.GET, request.FILES)
-        if form.is_valid():
-            idUser = form.cleaned_data['id']
-            user = get_object_or_404(UserInformation, pk=idUser)
-            shelf = shelve.open("dataRS.dat")
-            Prefs = shelf['Prefs']
-            shelf.close()
-            rankings = getRecommendations(Prefs,int(idUser))
-            recommended = rankings[:2]
-            films = []
-            scores = []
-            for re in recommended:
-                films.append(Film.objects.get(pk=re[1]))
-                scores.append(re[0])
-            items= zip(films,scores)
-            return render(request,'recommendationItems.html', {'user': user, 'items': items})
-    form = UserForm()
-    return render(request,'search_user.html', {'form': form})
-
-# APARTADO B
-def recommendedFilmsItems(request):
-    if request.method=='GET':
-        form = UserForm(request.GET, request.FILES)
-        if form.is_valid():
-            idUser = form.cleaned_data['id']
-            user = get_object_or_404(UserInformation, pk=idUser)
-            shelf = shelve.open("dataRS.dat")
-            Prefs = shelf['Prefs']
-            SimItems = shelf['SimItems']
-            shelf.close()
-            rankings = getRecommendedItems(Prefs, SimItems, int(idUser))
-            recommended = rankings[:2]
-            films = []
-            scores = []
-            for re in recommended:
-                films.append(Film.objects.get(pk=re[1]))
-                scores.append(re[0])
-            items= zip(films,scores)
-            return render(request,'recommendationItems.html', {'user': user, 'items': items})
-    form = UserForm()
-    return render(request,'search_user.html', {'form': form})
-
-# APARTADO C
-def similarFilms(request):
-    film = None
-    if request.method=='GET':
-        form = FilmForm(request.GET, request.FILES)
-        if form.is_valid():
-            idFilm = form.cleaned_data['id']
-            film = get_object_or_404(Film, pk=idFilm)
-            shelf = shelve.open("dataRS.dat")
-            ItemsPrefs = shelf['ItemsPrefs']
-            shelf.close()
-            recommended = topMatches(ItemsPrefs, int(idFilm),n=3)
-            films = []
-            similar = []
-            for re in recommended:
-                films.append(Film.objects.get(pk=re[1]))
-                similar.append(re[0])
-            items= zip(films,similar)
-            return render(request,'similarFilms.html', {'film': film,'films': items})
-    form = FilmForm()
-    return render(request,'search_film.html', {'form': form})
-
-# APARTADO D
-def recommendedUsersFilms(request):
-    if request.method=='GET':
-        form = FilmForm(request.GET, request.FILES)
-        if form.is_valid():
-            idFilm = form.cleaned_data['id']
-            film = get_object_or_404(Film, pk=idFilm)
-            shelf = shelve.open("dataRS.dat")
-            Prefs = shelf['ItemsPrefs']
-            shelf.close()
-            rankings = getRecommendations(Prefs,int(idFilm))
-            recommended = rankings[:3]
-            films = []
-            scores = []
-            for re in recommended:
-                films.append(UserInformation.objects.get(pk=re[1]))
-                scores.append(re[0])
-            items= zip(films,scores)
-            return render(request,'recommendationUsers.html', {'film': film, 'items': items})
-    form = FilmForm()
-    return render(request,'search_film.html', {'form': form})
-"""
 
 def search(request):
     if request.method=='GET':
@@ -242,10 +75,6 @@ def search(request):
         if form.is_valid():
             name = form.cleaned_data['name']
             nombres,links,imagenes,precios,s = offers(name)
-            """
-            return render(request, 'offers.html', 
-                {'nombres': nombres, 'links': links, 'imagenes': imagenes, 'precios': precios, 'site': s, 'range': range(len(s))})
-            """
             lst = [{'item1': t[0], 'item2': t[1], 'item3':t[2], 'item4': t[3], 'item5': t[4]} for t in zip(nombres,links,imagenes,precios,s)]
             return render(request, 'offers.html', {'lst': lst})
         else:
@@ -266,10 +95,7 @@ def offers(name):
     try:
         g2a(name, nombres, links, imagenes, precios, s)
     except:
-        pass
-    
-    #gamersgate(name, nombres, links, imagenes, precios, s)
-    
+        pass  
 
     return nombres,links,imagenes,precios,s
 
