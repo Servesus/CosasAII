@@ -153,11 +153,21 @@ def search(request):
 
 def offers(name):
     nombres,links,imagenes,precios,s = [],[],[],[],[]
-
-    instantgaming(name, nombres, links, imagenes, precios, s)
-    eneba(name, nombres, links, imagenes, precios, s)
+    try:
+        instantgaming(name, nombres, links, imagenes, precios, s)
+    except:
+        pass
+    try:
+        eneba(name, nombres, links, imagenes, precios, s)
+    except:
+        pass
+    try:
+        g2a(name, nombres, links, imagenes, precios, s)
+    except:
+        pass
+    
     #gamersgate(name, nombres, links, imagenes, precios, s)
-    g2a(name, nombres, links, imagenes, precios, s)
+    
 
     return nombres,links,imagenes,precios,s
 

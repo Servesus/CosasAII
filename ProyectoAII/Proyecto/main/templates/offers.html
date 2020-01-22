@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://www.w3schools.com/lib/w3.js"></script>
 </head>
 <body>
 {% include 'header.html' %}
@@ -12,13 +13,13 @@
 <table class="table" id ="myTable">
 <tr>
     <th></th>
-    <th>Nombre</th>
-    <th>Pagina</th>
-    <th>Link</th>
-    <th>Precio</th>
+    <th style="cursor:pointer">Nombre</th>
+    <th style="cursor:pointer">Pagina</th>
+    <th style="cursor:pointer">Link</th>
+    <th style="cursor:pointer">Precio</th>
 </tr>
 {% for x in lst %}
-<tr>
+<tr class="item">
     <td><img src="{{ x.item3 }}" height="210" width="140"></td>
     <td>{{ x.item1 }}</td>
     <td>{{ x.item5 }}</td>
@@ -30,5 +31,27 @@
 {% endfor %}
 </table>
 </div>
+<script>
+const myTable = document.querySelector('#myTable');
+// select all trs below the header:
+const trs = [...myTable.querySelectorAll('tr')].slice(1);
+const sortAscending = {
+  1: 1,
+  2: 1,
+  3: 1,
+  4: 1,
+};
+myTable.addEventListener('click', ({ target }) => {
+  if (!target.matches('th')) return;
+  const thIndex = Array.prototype.indexOf.call(target.parentElement.children, target);
+  const getText = tr => tr.children[thIndex].textContent;
+  trs.sort((a, b) => (
+    getText(a).localeCompare(getText(b), undefined, { numeric: true })
+    * sortAscending[thIndex]
+  ));
+  trs.forEach(tr => myTable.appendChild(tr));
+  sortAscending[thIndex] *= -1;
+});
+</script>
 </body>
 </html>
