@@ -7,7 +7,7 @@
 <section>
 <h1>Su busqueda no es exacta, aqui le sugerimos los siguientes titulos que contienen la palabra "{{name}}"</h1>
 {% for game in games %}
-<ul>Juego: <a href="offers/{{ game.idGame }}">{{game.name}}</a></ul>
+<ul>Juego: <a href="recommend/{{ game.idGame }}">{{game.name}}</a></ul>
 {% empty %}
 <h2> El Usuario no ha puntuado ninguna Pelicula </h2>
 {% endfor %}

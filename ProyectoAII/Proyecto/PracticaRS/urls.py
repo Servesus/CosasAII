@@ -7,9 +7,9 @@ from main import views
 urlpatterns = [
     path('', views.index),
     path('populate/', views.populateDB),
-    #path('loadRS', views.loadRS),
-    #path('similarGames', views.similarGames),
+    path('loadRS/', views.loadRS),
+    path('searchSimilar', views.specific),
     path('search', views.search),
-    path('offers/<str:idGame>', views.offers),
+    path('recommend/<str:idGame>', views.CBRecommendationSystem),
     path('admin/', admin.site.urls),
 ]

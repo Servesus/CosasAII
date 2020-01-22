@@ -1,33 +1,73 @@
-import shelve
 from main.models import User, Game, Tag
 from main.forms import GameForm, TagForm
+#from main.recommendations import recommend
 from django.shortcuts import render, get_object_or_404
-from main.recommendations import  transformPrefs, calculateSimilarItems, getRecommendations, getRecommendedItems, topMatches
 from main.populate import populateDatabase
 from urllib.request import urlopen,Request
 from bs4 import BeautifulSoup,NavigableString
+from rake_nltk import Rake
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
+import csv
 
 """
-# Funcion que carga en el diccionario Prefs todas las puntuaciones de usuarios a peliculas. Tambien carga el diccionario inverso y la matriz de similitud entre items
-# Serializa los resultados en dataRS.dat
-def loadDict():
-    Prefs={}   # matriz de usuarios y puntuaciones a cada a items
-    shelf = shelve.open("dataRS.dat")
-    ratings = Rating.objects.all()
-    for ra in ratings:
-        user = int(ra.user.id)
-        itemid = int(ra.film.id)
-        rating = float(ra.rating)
-        Prefs.setdefault(user, {})
-        Prefs[user][itemid] = rating
-    shelf['Prefs']=Prefs
-    shelf['ItemsPrefs']=transformPrefs(Prefs)
-    shelf['SimItems']=calculateSimilarItems(Prefs, n=10)
-    shelf.close()
-"""   
+def CBRecommendationSystem(request):
+    title = "Counter-Strike: Global Offensive"
+    cosine_sim, gameDict = CBRecommendationMatrix()
+    recommendations(title, cosine_sim, gameDict)
 
-
+def recommendations(title, cosine_sim, gameDict):
     
+    # initializing the empty list of recommended movies
+    recommended_games = []
+    keys = list(gameDict.keys())
+    
+    # gettin the index of the movie that matches the title
+    idx = keys.index(title)
+
+    # creating a Series with the similarity scores in descending order
+    a = list(cosine_sim[idx])
+    ascendingValues = a.copy()
+    ascendingValues.sort(reverse=True)
+    ascendingValues = list(dict.fromkeys(ascendingValues))
+    for i in ascendingValues:
+        names = a.index(i)
+        for n in names:
+            recommended_games.append(n)
+            if len(recommended_games)==10:
+                break
+        if len(recommended_games)==10:
+                break
+    
+    score_series = pd.Series(cosine_sim[idx]).sort_values(ascending = False)
+
+    # getting the indexes of the 10 most similar movies
+    top_10_indexes = list(score_series.iloc[1:11].index)
+    
+    # populating the list with the titles of the best 10 matching movies
+    for i in top_10_indexes:
+        recommended_movies.append(list(df.index)[i])
+        
+    return recommended_games
+
+def CBRecommendationMatrix():
+    gameDict = {} 
+    games = Game.objects.all()
+    for g in games:
+        tags = list(g.tags.all())
+        tagNames = ""
+        for t in tags:
+            tagNames = tagNames + t.name + ", "
+        gameDict[g.name] = tagNames
+
+    tf = TfidfVectorizer()
+    tfidf_matrix = tf.fit_transform(gameDict.values())
+
+    cosine_similarities = linear_kernel(tfidf_matrix, tfidf_matrix)
+
+    return cosine_similarities, gameDict
+"""
+
 #  CONJUNTO DE VISTAS
 
 def index(request): 
@@ -37,12 +77,61 @@ def populateDB(request):
     populateDatabase() 
     return render(request,'populate.html')
 
+def loadRS(request):
+    path = "steam"
+    with open(path+'\\game.csv', mode='w', newline="", encoding="utf-8") as game_file:
+        game_writer = csv.writer(game_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        game_writer.writerow(["name", "tagNames"])
+        games = Game.objects.all()
+        for g in games:
+            tags = list(g.tags.all())
+            tagNames = ""
+            for i in range(0, len(tags)):
+                t = tags[i]
+                if i!=len(tags)-1:
+                    tagNames = tagNames + str(t.name) + ";"
+                else:
+                    tagNames = tagNames + str(t.name)
+            
+            game_writer.writerow([str(g.name), tagNames])
+
+    return render(request,'loadRS.html')
+
+def specific(request):
+    if request.method=='GET':
+        form = GameForm(request.GET, request.FILES)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            game = list(Game.objects.filter(name__contains=name))
+            if len(game) == 0:
+                return render(request,'search_tag.html', {'form':form })
+            else:
+                return render(request, 'games.html', {'games': game, 'name': name})
+        else:
+            form=GameForm()
+            return render(request,'search_tag.html', {'form':form })
+
+def CBRecommendationSystem(idGame, request):
+    result = load()
+
 """
 def loadRS(request):
-    loadDict()
+    gameDict = {} 
+    games = Game.objects.all()
+    for g in games:
+        tags = list(g.tags.all())
+        tagNames = ""
+        for t in tags:
+            tagNames = tagNames + t.name + ", "
+        gameDict[g.name] = tagNames
+
+    tf = TfidfVectorizer()
+    tfidf_matrix = tf.fit_transform(gameDict.values())
+
+    cosine_similarities = linear_kernel(tfidf_matrix, tfidf_matrix)
+
     return render(request,'loadRS.html')
 """
-
 """
 # APARTADO A
 def recommendedFilmsUser(request):
