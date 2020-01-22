@@ -15,8 +15,8 @@ def populateGames():
         
     with open(path+"\\steam.csv", encoding="utf8") as csv_file:
         csv_reader = list(csv.reader(csv_file, delimiter=','))
-        #count = len(csv_reader) + 1
-        count = 500
+        #count = len(csv_reader)
+        count = 5000
         for i in range(1, count):
             row = csv_reader[i]
             tags = []
