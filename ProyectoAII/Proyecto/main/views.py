@@ -242,11 +242,21 @@ def search(request):
 
 def offers(name):
     nombres,links,imagenes,precios,s = [],[],[],[],[]
-
-    instantgaming(name, nombres, links, imagenes, precios, s)
-    eneba(name, nombres, links, imagenes, precios, s)
+    try:
+        instantgaming(name, nombres, links, imagenes, precios, s)
+    except:
+        pass
+    try:
+        eneba(name, nombres, links, imagenes, precios, s)
+    except:
+        pass
+    try:
+        g2a(name, nombres, links, imagenes, precios, s)
+    except:
+        pass
+    
     #gamersgate(name, nombres, links, imagenes, precios, s)
-    g2a(name, nombres, links, imagenes, precios, s)
+    
 
     return nombres,links,imagenes,precios,s
 
@@ -336,7 +346,7 @@ def g2a(busqueda, nombres, links, imagenes, precios, s):
             pass
 
 def eneba(busqueda, nombres, links, imagenes, precios, s):
-    site = "https://www.eneba.com/search?page=1&text="+busqueda+"&types[]=game"
+    site = "https://www.eneba.com/search?page=1&text="+str(busqueda.replace(' ', '%20'))+"&types[]=game"
     hdr = {'User-Agent': 'Mozilla/5.0'}
     req = Request(site,headers=hdr)
     page = urlopen(req)

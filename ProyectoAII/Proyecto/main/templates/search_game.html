@@ -1,16 +1,23 @@
 <html>
 <head>
 <title>Comparador de precios de claves</title>
+<style>
+.center_div{
+    margin: 0 auto;
+    width:20% /* value of your choice which suits your alignment */
+}
+</style>
 </head>
 <body>
 <header>
 {% include 'header.html' %}
 
-<h1>Buscar Juego</h1>
+<h1 class="center_div">Buscar Juego</h1>
+<div class="form-group center_div">
 <form id='form' method='get' action=''>
 {{form.as_p}}
-<p><input type='submit' value='Confirm'/></p>
+<p><input type='submit' class="btn btn-primary" value='Confirm'/></p>
 </form>
-
+</div class="form-group">
 </body>
 </html>
