@@ -1,6 +1,6 @@
 from main.models import User, Game, Tag
 from main.forms import GameForm, TagForm
-#from main.recommendations import recommend
+from main.recommendations import load, recommend
 from django.shortcuts import render, get_object_or_404
 from main.populate import populateDatabase
 from urllib.request import urlopen,Request
@@ -104,15 +104,28 @@ def specific(request):
             name = form.cleaned_data['name']
             game = list(Game.objects.filter(name__contains=name))
             if len(game) == 0:
-                return render(request,'search_tag.html', {'form':form })
+                return render(request,'search_tag.html', {'form':form , 'error':True})
             else:
                 return render(request, 'games.html', {'games': game, 'name': name})
         else:
             form=GameForm()
             return render(request,'search_tag.html', {'form':form })
 
-def CBRecommendationSystem(idGame, request):
-    result = load()
+def CBRecommendationSystem(request, idGame):
+    games = []
+    matrix = load()
+    game = Game.objects.get(idGame=idGame)
+    name = game.name
+    values = matrix[name]
+    for value in values:
+        n = value[1]
+        if n.find(name)==-1:
+            g = Game.objects.get(name=n)
+            games.append(g)
+        if len(games)==3:
+            break
+    
+    return render(request,'result.html', {'games':games, 'name':name })
 
 """
 def loadRS(request):

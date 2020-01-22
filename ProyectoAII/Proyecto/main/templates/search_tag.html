@@ -11,6 +11,8 @@
 {{form.as_p}}
 <p><input type='submit' value='Confirm'/></p>
 </form>
-
+{% if error %}
+  Esta busqueda no ha tenido resultados
+{% endif %}
 </body>
 </html>

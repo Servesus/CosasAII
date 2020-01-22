@@ -19,8 +19,7 @@ def load():
         similar_items = [(cosine_similarities[idx][i], ds['name'][i]) for i in similar_indices]
 
         results[row['name']] = similar_items[1:]
-        
-    print('done!')
+
     return results
 
 def item(id):
