@@ -257,7 +257,7 @@ def g2a(busqueda, nombres, links, imagenes, precios, s):
             pass
 
 def eneba(busqueda, nombres, links, imagenes, precios, s):
-    site = "https://www.eneba.com/search?page=1&text="+busqueda+"&types[]=game"
+    site = "https://www.eneba.com/search?page=1&text="+str(busqueda.replace(' ', '%20'))+"&types[]=game"
     hdr = {'User-Agent': 'Mozilla/5.0'}
     req = Request(site,headers=hdr)
     page = urlopen(req)
