@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup,NavigableString
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 import csv
+import shelve
 
 #  CONJUNTO DE VISTAS
 
@@ -35,6 +36,11 @@ def loadRS(request):
                     tagNames = tagNames + str(t.name)
             
             game_writer.writerow([str(g.name), tagNames])
+        
+        matrix = load()
+        shelf = shelve.open("dataRS.dat")
+        shelf['matrix']=matrix
+        shelf.close()
 
     return render(request,'loadRS.html')
 
@@ -54,7 +60,8 @@ def specific(request):
 
 def CBRecommendationSystem(request, idGame):
     games = []
-    matrix = load()
+    shelf = shelve.open("dataRS.dat")
+    matrix = shelf['matrix']
     game = Game.objects.get(idGame=idGame)
     name = game.name
     values = matrix[name]
